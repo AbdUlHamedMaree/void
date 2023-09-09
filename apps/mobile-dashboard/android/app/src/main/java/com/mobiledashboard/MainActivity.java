@@ -1,4 +1,4 @@
-package com.codebase;
+package com.mobiledashboard;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

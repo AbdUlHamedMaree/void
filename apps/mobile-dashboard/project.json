@@ -50,7 +50,9 @@
         "ensure-symlink",
         "sync-deps"
       ],
-      "options": {}
+      "options": {
+        "mode": "debug"
+      }
     },
     "build-android": {
       "executor": "@nx/react-native:build-android",
