@@ -9,6 +9,16 @@
     "react": "*",
     "react-native": "*",
     "react-native-svg": "*",
-    "metro-config": "*"
+    "metro-config": "*",
+    "react-native-svg-transformer": "*",
+    "reactotron-react-native": "*",
+    "@react-navigation/native": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-gesture-handler": "*",
+    "i18n-js": "*",
+    "react-native-localize": "*",
+    "@react-native-async-storage/async-storage": "*",
+    "zustand": "*",
+    "@shopify/restyle": "*"
   }
 }

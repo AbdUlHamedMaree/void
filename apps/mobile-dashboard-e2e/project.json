@@ -54,12 +54,18 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/mobile-dashboard-e2e/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/mobile-dashboard-e2e/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["mobile-dashboard"]
+  "implicitDependencies": [
+    "mobile-dashboard"
+  ]
 }

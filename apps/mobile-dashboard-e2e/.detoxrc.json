@@ -29,7 +29,8 @@
       "type": "android.apk",
       "build": "cd ../../apps/mobile-dashboard/android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release",
       "binaryPath": "../../apps/mobile-dashboard/android/app/build/outputs/apk/release/app-release.apk"
-    }
+    },
+
   },
   "devices": {
     "simulator": {
@@ -62,6 +63,7 @@
     "android.emu.debug": {
       "device": "emulator",
       "app": "android.debug"
-    }
+    },
+
   }
 }
