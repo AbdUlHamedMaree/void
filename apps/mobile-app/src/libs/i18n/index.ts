@@ -13,6 +13,7 @@ const RESOURCES = {
   ar: arResource,
 };
 
+// eslint-disable-next-line import/no-named-as-default-member
 i18next
   .use(AsyncStoragePlugin(getLocales()[0].languageCode))
   .use(initReactI18next)

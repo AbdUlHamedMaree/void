@@ -43,7 +43,8 @@
       "files": ["*.ts", "*.tsx"],
       "extends": ["plugin:@nx/typescript"],
       "rules": {
-        "@typescript-eslint/no-unused-vars": 0
+        "@typescript-eslint/no-unused-vars": 0,
+        "@typescript-eslint/no-namespace": 0
       }
     },
     {
@@ -55,7 +56,6 @@
     }
   ],
   "rules": {
-    "@typescript-eslint/no-unused-vars": 0,
     "unused-imports/no-unused-imports": 2,
     "unused-imports/no-unused-vars": [
       1,
@@ -65,6 +65,8 @@
         "args": "after-used",
         "argsIgnorePattern": "^_"
       }
-    ]
+    ],
+
+    "import/default": [0]
   }
 }
