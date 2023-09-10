@@ -18,6 +18,7 @@ public class MainActivity extends ReactActivity {
     return "MobileApp";
   }
 
+  //react-native-screens override
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(null);

@@ -17,7 +17,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {},
+
+    // lint
+    "strict": true,
+    "strictNullChecks": true,
   },
   "exclude": [
     "node_modules",

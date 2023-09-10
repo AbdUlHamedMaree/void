@@ -44,7 +44,7 @@ export const ThemeProvider = ({
 export type Theme = ReturnType<typeof getTheme>;
 
 export const Box = createBox<Theme>();
-export const BaseText = createText<Theme>();
+export const Text = createText<Theme>();
 export const useTheme = () => useReTheme<Theme>();
 
 type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };

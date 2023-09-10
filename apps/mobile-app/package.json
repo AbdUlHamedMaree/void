@@ -19,6 +19,12 @@
     "react-native-localize": "*",
     "@react-native-async-storage/async-storage": "*",
     "zustand": "*",
-    "@shopify/restyle": "*"
+    "@shopify/restyle": "*",
+    "i18next": "*",
+    "react-i18next": "*",
+    "i18next-react-native-async-storage": "*",
+    "intl-pluralrules": "*",
+    "react-native-screens": "*",
+    "@react-navigation/native-stack": "*"
   }
 }
