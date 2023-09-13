@@ -4,5 +4,6 @@
   // fix eslint errors/warnings on save
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
-  }
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
 }

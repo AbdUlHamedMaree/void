@@ -46,7 +46,10 @@
         "{projectRoot}/android/app/build/outputs/apk"
       ],
       "dependsOn": ["ensure-symlink", "sync-deps"],
-      "options": {}
+      "options": {
+        "tasks": ["assembleRelease", "bundleRelease"],
+        "mode": "release"
+      }
     },
     "build-ios": {
       "executor": "@nx/react-native:build-ios",

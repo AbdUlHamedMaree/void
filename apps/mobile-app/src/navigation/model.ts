@@ -1,9 +1,10 @@
-import { NavigatorScreenParams } from '@react-navigation/native';
-import { WelcomeStepperParamsList } from './welcome-stepper/model';
 import type { StackScreenProps } from '@react-navigation/stack';
+import { MainTabsParamList } from './main/model';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
-  WelcomeStepper: NavigatorScreenParams<WelcomeStepperParamsList>;
+  WelcomeStepper: undefined;
+  Main: NavigatorScreenParams<MainTabsParamList>;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = StackScreenProps<
