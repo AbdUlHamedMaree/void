@@ -1,6 +1,6 @@
-import { atomWithStorage } from 'jotai/utils';
+import { atomWithMMKV } from '$libs/jotai/atom-with-mmkv';
 
-export const isWelcomeStepperSkippedAtom = atomWithStorage<boolean>(
+export const isWelcomeStepperSkippedAtom = atomWithMMKV<boolean>(
   'is-welcome-stepper-skipped',
   false
 );

@@ -1,4 +1,4 @@
-import { atomWithStorage } from 'jotai/utils';
+import { atomWithMMKV } from '$libs/jotai/atom-with-mmkv';
 
 export enum ColorSchemaEnum {
   system = 'system',
@@ -8,7 +8,4 @@ export enum ColorSchemaEnum {
 
 export type ColorSchemaUnion = keyof typeof ColorSchemaEnum;
 
-export const colorSchemaAtom = atomWithStorage<ColorSchemaUnion>(
-  'color-schema',
-  'system'
-);
+export const colorSchemaAtom = atomWithMMKV<ColorSchemaUnion>('color-schema', 'system');

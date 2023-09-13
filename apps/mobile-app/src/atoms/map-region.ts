@@ -1,9 +1,9 @@
-import { atomWithStorage } from 'jotai/utils';
+import { atomWithMMKV } from '$libs/jotai/atom-with-mmkv';
 import { Region } from 'react-native-maps';
 
-export const mapRegionAtom = atomWithStorage<Region>('map-region', {
-  latitude: 37.78825,
-  longitude: -122.4324,
-  latitudeDelta: 0.0922,
-  longitudeDelta: 0.0421,
+export const mapRegionAtom = atomWithMMKV<Region>('map-region', {
+  longitudeDelta: 0.15110325068235397,
+  latitudeDelta: 0.1793406486560123,
+  longitude: 55.26689613237977,
+  latitude: 25.212185223887573,
 });

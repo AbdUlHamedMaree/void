@@ -31,6 +31,7 @@
     "react-native-vector-icons": "*",
     "deepmerge": "*",
     "jotai": "*",
-    "react-native-maps": "*"
+    "react-native-maps": "*",
+    "react-native-mmkv": "*"
   }
 }

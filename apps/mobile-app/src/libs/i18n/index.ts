@@ -1,9 +1,9 @@
 import 'intl-pluralrules';
-import i18next from 'i18next';
+import i18next, { LanguageDetectorModule } from 'i18next';
 
 import { initReactI18next } from 'react-i18next';
 import { getLocales } from 'react-native-localize';
-import AsyncStoragePlugin from 'i18next-react-native-async-storage';
+import { storage } from '$libs/mmkv';
 
 import { enResource } from './en';
 import { arResource } from './ar';
@@ -13,9 +13,21 @@ const RESOURCES = {
   ar: arResource,
 };
 
+const languageDetector: LanguageDetectorModule = {
+  type: 'languageDetector',
+  init: () => {},
+  detect: () => {
+    const lang = storage.lang.get(getLocales()[0].languageCode as 'en');
+    return lang;
+  },
+  cacheUserLanguage: language => {
+    storage.lang.set(language as 'en');
+  },
+};
+
 // eslint-disable-next-line import/no-named-as-default-member
 i18next
-  .use(AsyncStoragePlugin(getLocales()[0].languageCode))
+  .use(languageDetector)
   .use(initReactI18next)
   .init({
     supportedLngs: ['ar', 'en'],
