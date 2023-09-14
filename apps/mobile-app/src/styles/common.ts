@@ -19,4 +19,7 @@ export const commonStyles = StyleSheet.create({
   itemsCenter: {
     alignItems: 'center',
   },
+  textCenter: {
+    textAlign: 'center',
+  },
 });

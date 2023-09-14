@@ -4,7 +4,6 @@ import { commonStyles } from '$styles/common';
 import { useAtom } from 'jotai/react';
 import { mapRegionAtom } from '$atoms/map-region';
 import { useAppColorSchema } from '$hooks/use-app-color-schema';
-import { usePaperTheme } from '$theme/hook';
 
 export type MainHomeScreenProps = {
   //
@@ -13,7 +12,6 @@ export type MainHomeScreenProps = {
 export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
   const [mapRegion, setMapRegion] = useAtom(mapRegionAtom);
   const colorSchema = useAppColorSchema();
-  const theme = usePaperTheme();
 
   return (
     <SafeAreaView style={commonStyles.flexFull}>
