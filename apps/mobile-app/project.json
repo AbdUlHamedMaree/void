@@ -47,7 +47,6 @@
       ],
       "dependsOn": ["ensure-symlink", "sync-deps"],
       "options": {
-        "tasks": ["assembleRelease", "bundleRelease"],
         "mode": "release"
       }
     },

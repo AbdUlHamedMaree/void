@@ -1,5 +1,5 @@
 import { commonStyles } from '$styles/common';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 export type WelcomeStepperStepTwoProps = {
@@ -9,7 +9,12 @@ export type WelcomeStepperStepTwoProps = {
 export const WelcomeStepperStepTwo: React.FC<WelcomeStepperStepTwoProps> = () => {
   return (
     <View style={[commonStyles.flexFull, commonStyles.flexCenter]}>
-      <Text>Step Two</Text>
+      <Image
+        source={require('$assets/driver-texting@2.png')}
+        style={{ width: '90%', objectFit: 'contain' }}
+      />
+      <Text variant='headlineSmall'>Pick people while going to your destination</Text>
+      <Text variant='bodyLarge'>and take money from them!</Text>
     </View>
   );
 };
