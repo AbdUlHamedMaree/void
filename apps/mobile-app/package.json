@@ -32,6 +32,9 @@
     "deepmerge": "*",
     "jotai": "*",
     "react-native-maps": "*",
-    "react-native-mmkv": "*"
+    "react-native-mmkv": "*",
+    "date-fns": "*",
+    "react-hook-form": "*",
+    "react-native-paper-dates": "*"
   }
 }

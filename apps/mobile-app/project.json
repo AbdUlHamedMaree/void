@@ -47,7 +47,7 @@
       ],
       "dependsOn": ["ensure-symlink", "sync-deps"],
       "options": {
-        "mode": "release"
+        "tasks": "assembleRelease"
       }
     },
     "build-ios": {
