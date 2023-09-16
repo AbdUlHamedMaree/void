@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@babel/plugin-transform-template-literals": "*",
     "@react-native/metro-config": "*",
     "@react-navigation/native": "*",
     "@react-navigation/native-stack": "*",
@@ -18,10 +19,13 @@
     "react": "*",
     "react-hook-form": "*",
     "react-i18next": "*",
+    "react-merge-refs": "*",
     "react-native": "*",
     "react-native-gesture-handler": "*",
+    "react-native-reanimated": "*",
     "react-native-localize": "*",
     "react-native-maps": "*",
+    "react-native-mask-text": "*",
     "react-native-mmkv": "*",
     "react-native-paper": "*",
     "react-native-paper-dates": "*",
@@ -30,7 +34,6 @@
     "react-native-svg": "*",
     "react-native-svg-transformer": "*",
     "react-native-vector-icons": "*",
-    "react-native-mask-text": "*",
-    "react-merge-refs": "*"
+    "@gorhom/bottom-sheet": "*"
   }
 }
