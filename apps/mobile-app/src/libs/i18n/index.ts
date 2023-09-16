@@ -16,13 +16,8 @@ const RESOURCES = {
 const languageDetector: LanguageDetectorModule = {
   type: 'languageDetector',
   init: () => {},
-  detect: () => {
-    const lang = storage.lang.get(getLocales()[0].languageCode as 'en');
-    return lang;
-  },
-  cacheUserLanguage: language => {
-    storage.lang.set(language as 'en');
-  },
+  detect: () => storage.lang.get(getLocales()[0].languageCode as 'en'),
+  cacheUserLanguage: storage.lang.set,
 };
 
 // eslint-disable-next-line import/no-named-as-default-member
@@ -30,8 +25,7 @@ i18next
   .use(languageDetector)
   .use(initReactI18next)
   .init({
-    supportedLngs: ['ar', 'en'],
-    debug: __DEV__,
+    supportedLngs: Object.keys(RESOURCES),
     resources: RESOURCES,
     fallbackLng: 'en',
     ns: Object.keys(enResource),

@@ -5,5 +5,4 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "java.compile.nullAnalysis.mode": "automatic"
 }
