@@ -8,7 +8,7 @@ import React, { forwardRef, memo, useState } from 'react';
 import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
 import { mergeRefs } from 'react-merge-refs';
 import { View } from 'react-native';
-import { HelperText, TextInput } from 'react-native-paper';
+import { HelperText, TextInput, useTheme } from 'react-native-paper';
 import {
   DatePickerModal,
   DatePickerModalSingleProps,
@@ -55,6 +55,7 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
       forwardedRef
     ) {
       const { control } = useFormContext();
+      const theme = useTheme();
 
       const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
       const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
@@ -77,6 +78,8 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
             field: { ref, onChange, onBlur, value, disabled },
             fieldState: { error },
           }) => {
+            const color = error ? theme.colors.error : undefined;
+
             const finalDate = (() => {
               if (typeof value === 'string') {
                 const fullValue = completeDateStringWithDefault(value);
@@ -159,6 +162,13 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
                     disabled={disabled}
                     mode='outlined'
                     mask={dateTimeMask}
+                    outlineColor={color}
+                    textColor={color}
+                    cursorColor={color}
+                    underlineColor={color}
+                    activeOutlineColor={color}
+                    activeUnderlineColor={color}
+                    placeholderTextColor={color}
                     {...props}
                     onChangeText={mergeFunctions(onChange, props.onChangeText)}
                     ref={mergeRefs([ref, forwardedRef])}

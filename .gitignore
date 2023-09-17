@@ -325,3 +325,8 @@ yarn-error.log
 
 
 apps/mobile-app-e2e/artifacts
+
+# New
+TODO
+
+**/.env*.local

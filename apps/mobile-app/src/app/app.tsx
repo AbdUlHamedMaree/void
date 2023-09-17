@@ -10,6 +10,9 @@ import { AppNavigationContainer } from '$components/smart/app-navigation-contain
 import { commonStyles } from '$styles/common';
 import { WeakSplashScreen } from '$screens/weak-splash-screen';
 import { SplashScreen } from '$screens/splash-screen';
+import Geocoder from 'react-native-geocoding';
+
+Geocoder.init('AIzaSyANgo7cWUM0BgZ8sRI6j8VJKRczFB5Hh80');
 
 const Application: React.FC = () => {
   return (

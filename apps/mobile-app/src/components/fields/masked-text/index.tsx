@@ -7,7 +7,7 @@ import React, { forwardRef, memo } from 'react';
 import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
 import { mergeRefs } from 'react-merge-refs';
 import { View } from 'react-native';
-import { HelperText } from 'react-native-paper';
+import { HelperText, useTheme } from 'react-native-paper';
 
 export type MaskedTextFieldProps = {
   //
@@ -21,6 +21,8 @@ export const MaskedTextField = memo(
       forwardedRef
     ) {
       const { control } = useFormContext();
+      const theme = useTheme();
+
       return (
         <Controller
           name={name}
@@ -32,24 +34,35 @@ export const MaskedTextField = memo(
           render={({
             field: { ref, onChange, onBlur, value, disabled },
             fieldState: { error },
-          }) => (
-            <View>
-              <MaskedTextInput
-                mode='outlined'
-                disabled={disabled}
-                {...props}
-                ref={mergeRefs([ref, forwardedRef])}
-                onBlur={mergeFunctions(onBlur, props.onBlur)}
-                onChangeText={mergeFunctions(onChange, props.onChangeText)}
-                value={value}
-              />
-              {error && (
-                <HelperText type='error' visible>
-                  {error.message}
-                </HelperText>
-              )}
-            </View>
-          )}
+          }) => {
+            const color = error ? theme.colors.error : undefined;
+
+            return (
+              <View>
+                <MaskedTextInput
+                  mode='outlined'
+                  disabled={disabled}
+                  outlineColor={color}
+                  textColor={color}
+                  cursorColor={color}
+                  underlineColor={color}
+                  activeOutlineColor={color}
+                  activeUnderlineColor={color}
+                  placeholderTextColor={color}
+                  {...props}
+                  ref={mergeRefs([ref, forwardedRef])}
+                  onBlur={mergeFunctions(onBlur, props.onBlur)}
+                  onChangeText={mergeFunctions(onChange, props.onChangeText)}
+                  value={value}
+                />
+                {error && (
+                  <HelperText type='error' visible>
+                    {error.message}
+                  </HelperText>
+                )}
+              </View>
+            );
+          }}
         />
       );
     }
