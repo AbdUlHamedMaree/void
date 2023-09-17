@@ -11,8 +11,9 @@ import { commonStyles } from '$styles/common';
 import { WeakSplashScreen } from '$screens/weak-splash-screen';
 import { SplashScreen } from '$screens/splash-screen';
 import Geocoder from 'react-native-geocoding';
+import { GOOGLE_SERVICES_API } from '@env';
 
-Geocoder.init('AIzaSyANgo7cWUM0BgZ8sRI6j8VJKRczFB5Hh80');
+Geocoder.init(GOOGLE_SERVICES_API);
 
 const Application: React.FC = () => {
   return (

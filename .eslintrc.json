@@ -8,6 +8,7 @@
   "ignorePatterns": ["**/*"],
   "plugins": ["@nx", "unused-imports"],
   "settings": {
+    "import/ignore": ["@env"],
     "import/resolver": {
       "typescript": {
         "project": ["tsconfig.base.json", "apps/*/tsconfig.json"]
@@ -68,6 +69,7 @@
       }
     ],
 
-    "import/default": [0]
+    "import/default": [0],
+    "import/no-unresolved": [2, { "ignore": ["@env"] }]
   }
 }

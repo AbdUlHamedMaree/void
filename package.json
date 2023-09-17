@@ -43,8 +43,7 @@
     "react-native-screens": "^3.25.0",
     "react-native-vector-icons": "^10.0.0",
     "regenerator-runtime": "0.14.0",
-    "tslib": "^2.6.2",
-    "yarn": "^1.22.19"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.22.20",
@@ -109,6 +108,7 @@
     "nx": "16.8.1",
     "nx-cloud": "16.4.0",
     "prettier": "^3.0.3",
+    "react-native-dotenv": "^3.4.9",
     "react-native-svg": "^13.13.0",
     "react-native-svg-transformer": "1.1.0",
     "react-native-webview": "^13.6.0",

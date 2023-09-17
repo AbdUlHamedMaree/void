@@ -38,7 +38,7 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
 
   const onSubmit = methods.handleSubmit(data => console.log(data));
 
-  const snapPoints = useMemo(() => ['5%', '80%'], []);
+  const snapPoints = useMemo(() => [30, '80%'], []);
 
   const onSnapChange = useCallback(
     (index: number) => {
@@ -91,7 +91,7 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
         {dropoffLocation && (
           <Marker coordinate={dropoffLocation}>
             <TripMapMarkerCard>
-              <Text>Dropoff</Text>
+              <Text>Drop off</Text>
             </TripMapMarkerCard>
           </Marker>
         )}

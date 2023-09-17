@@ -35,6 +35,7 @@
     "react-native-svg-transformer": "*",
     "react-native-vector-icons": "*",
     "@gorhom/bottom-sheet": "*",
-    "react-native-geocoding": "*"
+    "react-native-geocoding": "*",
+    "react-native-dotenv": "*"
   }
 }
