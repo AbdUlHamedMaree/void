@@ -1,10 +1,12 @@
 import { RootStackParamList, RootStackScreenProps } from '$navigation/model';
-import { CompositeScreenProps } from '@react-navigation/native';
+import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { MaterialBottomTabScreenProps } from 'react-native-paper';
+import { ProfileStackParamList } from './profile/model';
 
 export type MainTabsParamList = {
   Home: undefined;
   Trips: undefined;
+  Profile: NavigatorScreenParams<ProfileStackParamList>;
 };
 
 export type MainTabsScreenProps<T extends keyof MainTabsParamList> = CompositeScreenProps<

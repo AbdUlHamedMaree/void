@@ -6,14 +6,14 @@ export const commonStyles = StyleSheet.create({
     flex: 1,
   },
   screenPadding: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.md + spacing.sm,
     paddingVertical: spacing.lg,
   },
   flexCenter: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  contentCenter: {
+  justifyCenter: {
     justifyContent: 'center',
   },
   itemsCenter: {

@@ -4,4 +4,7 @@ export const spacing = {
   md: 8,
   lg: 16,
   xl: 32,
+  xxl: 64,
 };
+
+export const gSpacing = (n: number) => n * 4;
