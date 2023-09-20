@@ -6,4 +6,4 @@ export type UserModel = {
   email: string;
 };
 
-export const userAtom = atomWithMMKV<UserModel | undefined>('user', undefined);
+export const userAtom = atomWithMMKV<UserModel | null>('user', null);

@@ -13,6 +13,7 @@
     "@emotion/server": "11.11.0",
     "@emotion/styled": "11.11.0",
     "@gorhom/bottom-sheet": "^4",
+    "@hookform/resolvers": "^3.3.1",
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/native-stack": "^6.9.13",
     "@react-navigation/stack": "^6.3.17",
@@ -45,7 +46,8 @@
     "react-native-screens": "^3.25.0",
     "react-native-vector-icons": "^10.0.0",
     "regenerator-runtime": "0.14.0",
-    "tslib": "^2.6.2"
+    "tslib": "^2.6.2",
+    "zod": "^3.22.2"
   },
   "devDependencies": {
     "@babel/core": "^7.22.20",

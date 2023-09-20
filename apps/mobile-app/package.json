@@ -38,6 +38,8 @@
     "react-native-geocoding": "*",
     "react-native-dotenv": "*",
     "immer": "*",
-    "nanoid": "*"
+    "nanoid": "*",
+    "@hookform/resolvers": "*",
+    "zod": "*"
   }
 }
