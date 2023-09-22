@@ -6,15 +6,30 @@ import { useNavigation } from '@react-navigation/native';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { View } from 'react-native';
-import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
+import {
+  Button,
+  Divider,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { object, string } from 'zod';
 import { useSetAtom } from 'jotai';
 import { userAtom } from '$atoms/user';
+import { MaskedTextField } from '$components/fields/masked-text';
+import { PaperButton } from '$components/dumb/paper-button';
 
 const validationSchema = object({
-  email: string().email(),
-  password: string(),
+  phone: string({ required_error: 'Phone is required field' }).regex(
+    /^(50|51|52|55|56|58|2|3|4|6|7|9)\d{7}$/,
+    'Phone should be a valid UAE number'
+  ),
+  password: string({ required_error: 'Password is required field' }).min(
+    8,
+    'Password should be at least 8 digits'
+  ),
 });
 
 export type MainProfileLoginScreenProps = {
@@ -26,7 +41,7 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
 
   const methods = useForm({
     defaultValues: {
-      email: '',
+      phone: '',
       password: '',
     },
     resolver: zodResolver(validationSchema),
@@ -37,10 +52,10 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
   const theme = useTheme();
 
   const handleSubmit = methods.handleSubmit(values => {
+    const phoneWithCountryCode = '+961' + values.phone;
     setUser({
-      email: values.email,
+      phone: phoneWithCountryCode,
       id: Date.now() + '',
-      fullName: 'Jone Doe',
     });
 
     navigate('Main', { screen: 'Profile', params: { screen: 'Account' } });
@@ -64,8 +79,19 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
         Please login to continue using the app
       </Text>
       <FormProvider {...methods}>
-        <TextField name='email' label='Email' style={{ marginTop: spacing.xxl }} />
-        <TextField name='password' label='Password' style={{ marginTop: spacing.lg }} />
+        <MaskedTextField
+          name='phone'
+          label='Phone'
+          mask='999999999'
+          left={<TextInput.Affix text='+961' />}
+          style={{ marginTop: spacing.xxl }}
+        />
+        <TextField
+          name='password'
+          label='Password'
+          secureTextEntry
+          style={{ marginTop: spacing.lg }}
+        />
       </FormProvider>
 
       <Button
@@ -75,8 +101,7 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
         Forgot Password?
       </Button>
 
-      <Button
-        mode='contained'
+      <PaperButton
         onPress={handleSubmit}
         style={{
           borderRadius: theme.roundness,
@@ -84,10 +109,8 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
           marginTop: spacing.xl,
         }}
       >
-        <Text variant='bodyLarge' style={{ color: theme.colors.onPrimary }}>
-          Login
-        </Text>
-      </Button>
+        Login
+      </PaperButton>
       <View
         style={{
           flexDirection: 'row',

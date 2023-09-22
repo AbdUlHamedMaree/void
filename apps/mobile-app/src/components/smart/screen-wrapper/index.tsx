@@ -4,17 +4,28 @@ import { forwardRef, memo } from 'react';
 import { SafeAreaView, SafeAreaProviderProps } from 'react-native-safe-area-context';
 
 export type ScreenWrapperProps = {
-  children?: React.ReactNode;
   disablePadding?: boolean;
+  disableFlexFull?: boolean;
+
   center?: boolean;
   verticalCenter?: boolean;
   horizontalCenter?: boolean;
+
+  children?: React.ReactNode;
 } & SafeAreaProviderProps;
 
 export const ScreenWrapper = memo(
   forwardRef<React.ComponentRef<typeof SafeAreaView>, ScreenWrapperProps>(
     function ScreenWrapper(
-      { children, disablePadding, center, verticalCenter, horizontalCenter, ...props },
+      {
+        children,
+        disablePadding,
+        disableFlexFull,
+        center,
+        verticalCenter,
+        horizontalCenter,
+        ...props
+      },
       forwardRef
     ) {
       return (
@@ -22,6 +33,7 @@ export const ScreenWrapper = memo(
           {...props}
           ref={forwardRef}
           style={[
+            !disableFlexFull && commonStyles.flexFull,
             !disablePadding && commonStyles.screenPadding,
             center && commonStyles.flexCenter,
             verticalCenter && commonStyles.justifyCenter,

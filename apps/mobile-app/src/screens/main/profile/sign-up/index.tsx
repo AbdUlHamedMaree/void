@@ -1,11 +1,34 @@
+import { PaperButton } from '$components/dumb/paper-button';
+import { MaskedTextField } from '$components/fields/masked-text';
 import { TextField } from '$components/fields/text';
 import { commonStyles } from '$styles/common';
 import { spacing } from '$theme/spacing';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation } from '@react-navigation/native';
 import { FormProvider, useForm } from 'react-hook-form';
 import { View } from 'react-native';
-import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
+import {
+  Button,
+  Divider,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { object, string } from 'zod';
+
+const validationSchema = object({
+  phone: string({ required_error: 'Phone is required field' }).regex(
+    /^(50|51|52|55|56|58|2|3|4|6|7|9)\d{7}$/,
+    'Phone should be a valid UAE number'
+  ),
+  password: string({ required_error: 'Password is required field' }),
+  repeatPassword: string({ required_error: 'Repeat password is required field' }),
+}).refine(({ password, repeatPassword }) => password === repeatPassword, {
+  message: 'Repeat password should be same as password',
+  path: ['repeatPassword'],
+});
 
 export type MainProfileSignUpScreenProps = {
   //
@@ -14,10 +37,11 @@ export type MainProfileSignUpScreenProps = {
 export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = () => {
   const methods = useForm({
     defaultValues: {
-      fullName: '',
-      email: '',
+      phone: '',
       password: '',
+      repeatPassword: '',
     },
+    resolver: zodResolver(validationSchema),
   });
 
   const { navigate } = useNavigation();
@@ -25,7 +49,11 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
   const theme = useTheme();
 
   const handleSubmit = methods.handleSubmit(values => {
-    console.log(values);
+    const phoneWithCountryCode = '+961' + values.phone;
+    navigate('Main', {
+      screen: 'Profile',
+      params: { screen: 'OTP', params: { phone: phoneWithCountryCode } },
+    });
   });
 
   return (
@@ -46,28 +74,28 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
         Please fill the details and create an account
       </Text>
       <FormProvider {...methods}>
-        <TextField
-          name='fullName'
-          label='Full Name'
-          rules={{ required: 'Full Name is required' }}
+        <MaskedTextField
+          left={<TextInput.Affix text='+961' />}
+          name='phone'
+          label='Phone'
+          mask='999999999'
           style={{ marginTop: spacing.xxl }}
-        />
-        <TextField
-          name='email'
-          label='Email'
-          rules={{ required: 'Email is required' }}
-          style={{ marginTop: spacing.lg }}
         />
         <TextField
           name='password'
           label='Password'
-          rules={{ required: 'Email is required' }}
+          secureTextEntry
+          style={{ marginTop: spacing.lg }}
+        />
+        <TextField
+          name='repeatPassword'
+          label='Repeat Password'
+          secureTextEntry
           style={{ marginTop: spacing.lg }}
         />
       </FormProvider>
 
-      <Button
-        mode='contained'
+      <PaperButton
         onPress={handleSubmit}
         style={{
           borderRadius: theme.roundness,
@@ -75,10 +103,8 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
           marginTop: spacing.xl,
         }}
       >
-        <Text variant='bodyLarge' style={{ color: theme.colors.onPrimary }}>
-          Sign Up
-        </Text>
-      </Button>
+        Sign Up
+      </PaperButton>
       <View
         style={{
           flexDirection: 'row',

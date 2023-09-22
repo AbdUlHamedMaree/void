@@ -7,6 +7,9 @@ export type ProfileStackParamList = {
   Login: undefined;
   SignUp: undefined;
   Account: undefined;
+  OTP: {
+    phone: string;
+  };
 };
 
 export type ProfileStackScreenProps<T extends keyof ProfileStackParamList> =

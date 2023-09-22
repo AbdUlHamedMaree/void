@@ -33,7 +33,7 @@ export const MainProfileAccountScreen: React.FC<MainProfileAccountScreenProps> =
         style={{ alignSelf: 'center' }}
       />
       <Text variant='displaySmall' style={{ textAlign: 'center', marginTop: spacing.lg }}>
-        {user?.fullName}
+        {user?.phone}
       </Text>
       <PaperButton onPress={handleLogout} style={{ marginTop: spacing.xl }}>
         Logout
