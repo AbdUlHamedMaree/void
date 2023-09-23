@@ -9,6 +9,8 @@ export type ProfileStackParamList = {
   Account: undefined;
   OTP: {
     phone: string;
+    // TODO: remove later.
+    otp: string;
   };
 };
 

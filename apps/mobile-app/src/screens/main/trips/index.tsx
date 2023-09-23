@@ -7,6 +7,7 @@ import { FAB } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 let id = 0;
+
 export type MainTripsScreenProps = {
   //
 };

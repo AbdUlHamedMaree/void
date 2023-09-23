@@ -61,6 +61,29 @@ export const PaperButton = memo(
       }
     }, [size]);
 
+    const textColorVariant = useMemo(() => {
+      switch (mode) {
+        case 'contained':
+          return theme.colors.onPrimary;
+        case 'contained-tonal':
+          return theme.colors.onSecondaryContainer;
+        case 'elevated':
+          return theme.colors.secondary;
+        case 'outlined':
+          return theme.colors.primary;
+        case 'text':
+          return theme.colors.primary;
+        default:
+          return undefined;
+      }
+    }, [
+      mode,
+      theme.colors.onPrimary,
+      theme.colors.onSecondaryContainer,
+      theme.colors.primary,
+      theme.colors.secondary,
+    ]);
+
     return (
       <Button
         mode={mode}
@@ -77,7 +100,7 @@ export const PaperButton = memo(
         <Text
           variant={textVariant}
           {...textProps}
-          style={[{ color: theme.colors.onPrimary }, textProps?.style]}
+          style={[{ color: textColorVariant }, textProps?.style]}
         >
           {children}
         </Text>

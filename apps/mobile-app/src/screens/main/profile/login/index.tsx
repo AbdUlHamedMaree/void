@@ -20,6 +20,9 @@ import { useSetAtom } from 'jotai';
 import { userAtom } from '$atoms/user';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { PaperButton } from '$components/dumb/paper-button';
+import { graphql } from '$gql';
+import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
+import { storage } from '$libs/mmkv';
 
 const validationSchema = object({
   phone: string({ required_error: 'Phone is required field' }).regex(
@@ -32,11 +35,30 @@ const validationSchema = object({
   ),
 });
 
+const loginDocument = graphql(`
+  mutation LoginMutation($loginPayload: LoginPayloadIt!) {
+    login(payload: $loginPayload) {
+      user {
+        id
+        email
+        phone
+        role
+        status
+        createdAt
+        updatedAt
+      }
+      accessToken
+      refreshToken
+    }
+  }
+`);
+
 export type MainProfileLoginScreenProps = {
   //
 };
 
 export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () => {
+  const loginMutation = useGraphQLMutation(loginDocument);
   const setUser = useSetAtom(userAtom);
 
   const methods = useForm({
@@ -51,11 +73,21 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
 
   const theme = useTheme();
 
-  const handleSubmit = methods.handleSubmit(values => {
-    const phoneWithCountryCode = '+961' + values.phone;
+  const handleSubmit = methods.handleSubmit(async values => {
+    const phoneWithCountryCode = '971' + values.phone;
+
+    const {
+      login: { accessToken, refreshToken, user },
+    } = await loginMutation.mutateAsync({
+      loginPayload: { username: phoneWithCountryCode, password: values.password },
+    });
+
+    storage.accessToken.set(accessToken);
+    storage.refreshToken.set(refreshToken);
+
     setUser({
-      phone: phoneWithCountryCode,
-      id: Date.now() + '',
+      phone: user.phone ?? undefined,
+      id: user.id ?? Date.now() + '',
     });
 
     navigate('Main', { screen: 'Profile', params: { screen: 'Account' } });
@@ -83,7 +115,7 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
           name='phone'
           label='Phone'
           mask='999999999'
-          left={<TextInput.Affix text='+961' />}
+          left={<TextInput.Affix text='+971' />}
           style={{ marginTop: spacing.xxl }}
         />
         <TextField

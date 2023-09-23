@@ -1,6 +1,8 @@
 import { PaperButton } from '$components/dumb/paper-button';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { TextField } from '$components/fields/text';
+import { graphql } from '$gql';
+import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
 import { commonStyles } from '$styles/common';
 import { spacing } from '$theme/spacing';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,18 +25,43 @@ const validationSchema = object({
     /^(50|51|52|55|56|58|2|3|4|6|7|9)\d{7}$/,
     'Phone should be a valid UAE number'
   ),
-  password: string({ required_error: 'Password is required field' }),
+  password: string({ required_error: 'Password is required field' }).min(
+    8,
+    'Password should be at least 8 characters'
+  ),
   repeatPassword: string({ required_error: 'Repeat password is required field' }),
 }).refine(({ password, repeatPassword }) => password === repeatPassword, {
   message: 'Repeat password should be same as password',
   path: ['repeatPassword'],
 });
 
+const signUpDocument = graphql(`
+  mutation SignUpMutation($signUpPayload: SignupAppUsersIt!) {
+    signup(payload: $signUpPayload) {
+      id
+    }
+  }
+`);
+
+const sendOTPDocument = graphql(`
+  mutation SendOTPMutation($sendOTPPayload: OtpLoginPayloadIt!) {
+    sendOtp(payload: $sendOTPPayload) {
+      message
+    }
+  }
+`);
+
 export type MainProfileSignUpScreenProps = {
   //
 };
 
 export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = () => {
+  const { navigate } = useNavigation();
+  const theme = useTheme();
+
+  const signUpMutation = useGraphQLMutation(signUpDocument);
+  const sendOTPMutation = useGraphQLMutation(sendOTPDocument);
+
   const methods = useForm({
     defaultValues: {
       phone: '',
@@ -44,16 +71,38 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
     resolver: zodResolver(validationSchema),
   });
 
-  const { navigate } = useNavigation();
+  const handleSubmit = methods.handleSubmit(async values => {
+    const phoneWithCountryCode = '971' + values.phone;
 
-  const theme = useTheme();
+    try {
+      await signUpMutation.mutateAsync({
+        signUpPayload: {
+          phone: phoneWithCountryCode,
+          email: 'b@a.com',
+          name: 'hmib',
+          password: values.password,
+          role: 'user',
+        },
+      });
 
-  const handleSubmit = methods.handleSubmit(values => {
-    const phoneWithCountryCode = '+961' + values.phone;
-    navigate('Main', {
-      screen: 'Profile',
-      params: { screen: 'OTP', params: { phone: phoneWithCountryCode } },
-    });
+      const {
+        sendOtp: { message },
+      } = await sendOTPMutation.mutateAsync({
+        sendOTPPayload: {
+          phone: phoneWithCountryCode,
+        },
+      });
+
+      // *(1234)*
+      const otp = message.substring(message.indexOf('('), message.indexOf(')'));
+
+      navigate('Main', {
+        screen: 'Profile',
+        params: { screen: 'OTP', params: { phone: phoneWithCountryCode, otp } },
+      });
+    } catch (err) {
+      console.error(err);
+    }
   });
 
   return (
@@ -75,7 +124,7 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
       </Text>
       <FormProvider {...methods}>
         <MaskedTextField
-          left={<TextInput.Affix text='+961' />}
+          left={<TextInput.Affix text='+971' />}
           name='phone'
           label='Phone'
           mask='999999999'

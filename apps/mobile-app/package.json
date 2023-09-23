@@ -40,6 +40,13 @@
     "immer": "*",
     "nanoid": "*",
     "@hookform/resolvers": "*",
-    "zod": "*"
+    "zod": "*",
+    "@graphql-typed-document-node/core": "*",
+    "graphql": "*",
+    "axios": "*",
+    "@react-native-community/netinfo": "*",
+    "@tanstack/react-query": "*",
+    "graphql-request": "*",
+    "react-native-permissions": "*"
   }
 }

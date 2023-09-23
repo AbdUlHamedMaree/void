@@ -13,10 +13,15 @@ import { SplashScreen } from '$screens/splash-screen';
 import Geocoder from 'react-native-geocoding';
 import { GOOGLE_SERVICES_API } from '@env';
 import { PaperToastContainer } from '$modules/react-native-paper-toast';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '$libs/react-query/client';
+import { useRefetchOnAppFocus } from '$libs/react-query/use-refetch-on-app-focus';
 
 Geocoder.init(GOOGLE_SERVICES_API);
 
 const Application: React.FC = () => {
+  useRefetchOnAppFocus();
+
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <AppPaperProvider>
@@ -24,7 +29,10 @@ const Application: React.FC = () => {
         <AppNavigationContainer>
           <Suspense fallback={<SplashScreen />}>
             <PaperToastContainer />
-            <RootStack />
+
+            <QueryClientProvider client={queryClient}>
+              <RootStack />
+            </QueryClientProvider>
           </Suspense>
         </AppNavigationContainer>
       </AppPaperProvider>

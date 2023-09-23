@@ -2,6 +2,9 @@ import { userAtom } from '$atoms/user';
 import { PaperButton } from '$components/dumb/paper-button';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
+import { graphql } from '$gql';
+import { storage } from '$libs/mmkv';
+import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
 import { ProfileStackScreenProps } from '$navigation/main/profile/model';
 import { commonStyles } from '$styles/common';
 import { spacing } from '$theme/spacing';
@@ -15,10 +18,24 @@ import { object, string } from 'zod';
 
 const validationSchema = object({
   otp: string({ required_error: 'Code is required field' }).length(
-    6,
-    'should be 6 digits'
+    4,
+    'should be 4 digits'
   ),
 });
+
+const verifyOTPDocument = graphql(`
+  mutation VeryOTPMutation($verifyOTPPayload: OtpVerificationPayloadIt!) {
+    verifyOtp(payload: $verifyOTPPayload) {
+      accessToken
+      refreshToken
+      user {
+        id
+        email
+        phone
+      }
+    }
+  }
+`);
 
 export type MainProfileOTPScreenProps = {
   //
@@ -26,8 +43,10 @@ export type MainProfileOTPScreenProps = {
 
 export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
   const { navigate } = useNavigation();
-
   const setUser = useSetAtom(userAtom);
+
+  const verifyOTPMutation = useGraphQLMutation(verifyOTPDocument);
+
   const methods = useForm({
     defaultValues: {
       otp: '',
@@ -36,19 +55,35 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
   });
 
   const {
-    params: { phone },
+    params: { phone, otp },
   } = useRoute<ProfileStackScreenProps<'OTP'>['route']>();
 
   const theme = useTheme();
 
-  const handleSubmit = methods.handleSubmit(() => {
-    setUser({ id: Date.now() + '', phone });
-    navigate('Main', {
-      screen: 'Profile',
-      params: {
-        screen: 'Account',
-      },
-    });
+  const handleSubmit = methods.handleSubmit(async value => {
+    try {
+      const {
+        verifyOtp: { accessToken, refreshToken, user },
+        // TODO: user values.otp later
+      } = await verifyOTPMutation.mutateAsync({
+        verifyOTPPayload: { otp, phoneNumber: phone },
+      });
+
+      storage.accessToken.set(accessToken);
+      storage.refreshToken.set(refreshToken);
+
+      console.log(user);
+
+      setUser({ id: user.id!, phone: user.phone ?? undefined });
+      navigate('Main', {
+        screen: 'Profile',
+        params: {
+          screen: 'Account',
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
   });
 
   return (
