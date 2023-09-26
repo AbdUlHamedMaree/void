@@ -28,7 +28,7 @@ const Application: React.FC = () => {
         <AppStatusBar />
         <AppNavigationContainer>
           <Suspense fallback={<SplashScreen />}>
-            <PaperToastContainer />
+            <PaperToastContainer variant='contained' />
 
             <QueryClientProvider client={queryClient}>
               <RootStack />

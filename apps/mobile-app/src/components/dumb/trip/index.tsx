@@ -3,7 +3,7 @@ import { commonStyles } from '$styles/common';
 import { spacing } from '$theme/spacing';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { Button, Card, Divider, Text } from 'react-native-paper';
+import { Button, Card, CardProps, Divider, Text } from 'react-native-paper';
 import { format } from 'date-fns';
 
 export type TripProps = {
@@ -11,11 +11,17 @@ export type TripProps = {
   dest?: string;
   time?: Date;
   emptySeatsCount?: number;
-};
+} & Omit<CardProps, 'children' | 'mode' | 'elevation'>;
 
-export const Trip: React.FC<TripProps> = ({ source, dest, time, emptySeatsCount }) => {
+export const Trip: React.FC<TripProps> = ({
+  source,
+  dest,
+  time,
+  emptySeatsCount,
+  ...props
+}) => {
   return (
-    <Card>
+    <Card {...props}>
       <Card.Content style={styles.cardContent}>
         <Text variant='titleMedium'>{source ?? 'Unknown Source'}</Text>
 

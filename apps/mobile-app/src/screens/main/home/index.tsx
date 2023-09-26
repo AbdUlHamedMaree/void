@@ -1,17 +1,128 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Polyline } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { commonStyles } from '$styles/common';
 import { useAtom } from 'jotai/react';
 import { mapRegionAtom } from '$atoms/map-region';
 import { useAppColorSchema } from '$hooks/use-app-color-schema';
+import { graphql } from '$gql';
+import { useMemo } from 'react';
+import { TripMapMarkerCard } from '$components/dumb/trip-map-marker-card';
+import { Text } from 'react-native-paper';
+import { useGraphQLQuery } from '$libs/react-query/use-graphql-query';
+
+const tripsDocument = graphql(`
+  query HomeTripsQuery($tripsQueryMeta: MetaRequest!) {
+    trips(meta: $tripsQueryMeta) {
+      items {
+        id
+        capacity
+        occupiedSeats
+        status
+        seatsStatus
+        type
+        createdById
+
+        timeline {
+          id
+          latitude
+          longitude
+          occupiedSeats
+          status
+        }
+
+        passengers {
+          id
+          email
+          phone
+        }
+
+        reservations {
+          userId
+          poolerType
+          requestedSeatsCount
+        }
+
+        driver {
+          id
+          email
+          phone
+        }
+
+        pickupAddress {
+          addressLineOne
+          addressLineTwo
+          area
+          city
+          country
+          postCode
+        }
+        pickupLatitude
+        pickupLongitude
+
+        dropoffAddress {
+          addressLineOne
+          addressLineTwo
+          area
+          city
+          country
+          postCode
+        }
+        dropoffLatitude
+        dropoffLongitude
+      }
+      meta {
+        limit
+        page
+        totalCount
+        totalPages
+      }
+    }
+  }
+`);
 
 export type MainHomeScreenProps = {
   //
 };
 
 export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
+  const tripsQuery = useGraphQLQuery(tripsDocument, {
+    tripsQueryMeta: { limit: 10, page: 1 },
+  });
+
+  const trips = tripsQuery.data?.trips.items;
+
   const [mapRegion, setMapRegion] = useAtom(mapRegionAtom);
   const colorSchema = useAppColorSchema();
+
+  const tripsMarkers = useMemo(
+    () =>
+      trips?.map(trip => (
+        <>
+          <Marker
+            key={trip.id}
+            coordinate={{
+              latitude: trip.pickupLatitude,
+              longitude: trip.pickupLongitude,
+            }}
+          >
+            <TripMapMarkerCard>
+              <Text>Pickup</Text>
+            </TripMapMarkerCard>
+          </Marker>
+          <Marker
+            coordinate={{
+              latitude: trip.dropoffLatitude,
+              longitude: trip.dropoffLongitude,
+            }}
+          >
+            <TripMapMarkerCard>
+              <Text>Dropoff</Text>
+            </TripMapMarkerCard>
+          </Marker>
+        </>
+      )),
+    [trips]
+  );
 
   return (
     <SafeAreaView style={commonStyles.flexFull}>
@@ -20,21 +131,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
         initialRegion={mapRegion}
         userInterfaceStyle={colorSchema}
         onRegionChange={setMapRegion}
-        onPress={e => {
-          console.log(e.nativeEvent.coordinate);
-        }}
       >
-        <Polyline
-          strokeWidth={3}
-          coordinates={[
-            { latitude: 25.23051156268411, longitude: 55.28713256120682 },
-            { latitude: 25.230129112325294, longitude: 55.288368724286556 },
-            { latitude: 25.229473696978292, longitude: 55.28831776231527 },
-            { latitude: 25.22115013039745, longitude: 55.2817527204752 },
-            { latitude: 25.216101967544464, longitude: 55.278230644762516 },
-            { latitude: 25.2137757322375, longitude: 55.27610331773758 },
-          ]}
-        />
+        {tripsMarkers}
       </MapView>
     </SafeAreaView>
   );

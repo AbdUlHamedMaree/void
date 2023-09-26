@@ -1,7 +1,7 @@
 import React from 'react';
 import { SnackbarProps } from 'react-native-paper';
 
-export type SnackbarTypeUnion = 'default' | 'info' | 'warning' | 'error';
+export type SnackbarTypeUnion = 'default' | 'info' | 'success' | 'warning' | 'error';
 export type SnackbarVariantUnion = 'outlined' | 'contained';
 
 export type SnackbarModel = {

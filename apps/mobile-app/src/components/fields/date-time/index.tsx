@@ -28,6 +28,8 @@ export const fallbackDateTimeString = '01/01/2020 12:00 PM';
 
 export const dateTimeMask = '99/99/9999 99:99 AA';
 
+export const dateTimeFormatHelperText = 'DD/MM/YYYY HH:MM XP';
+
 const completeDateStringWithDefault = (value: string) =>
   value + fallbackDateTimeString.substring(value.length, fallbackDateTimeString.length);
 
@@ -36,8 +38,6 @@ export type DateTimeFieldProps = {
   timePickerProps?: Partial<React.ComponentProps<typeof TimePickerModal>>;
 } & Omit<ControllerProps, 'render' | 'control'> &
   MaskedTextInputProps;
-
-export const dateTimeFormatHelperText = 'DD/MM/YYYY HH:MM XP';
 
 export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
   forwardRef<React.ComponentRef<typeof MaskedTextInput>, DateTimeFieldProps>(
@@ -56,6 +56,8 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
     ) {
       const { control } = useFormContext();
       const theme = useTheme();
+
+      const [fieldValue, setFieldValue] = useState('');
 
       const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
       const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
@@ -80,30 +82,8 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
           }) => {
             const color = error ? theme.colors.error : undefined;
 
-            const finalDate = (() => {
-              if (typeof value === 'string') {
-                const fullValue = completeDateStringWithDefault(value);
-
-                const date = parse(fullValue, dateTimeFormate, 0);
-
-                return isNaN(date.getDay()) ? undefined : date;
-              }
-
-              if (value instanceof Date) return value;
-
-              return undefined;
-            })();
-
-            const finalValue = (() => {
-              if (value instanceof Date) return format(value, dateTimeFormate);
-
-              if (typeof value === 'string') return value;
-
-              return '';
-            })();
-
-            const finalHours = finalDate?.getHours();
-            const finalMinutes = finalDate?.getMinutes();
+            const finalHours = value?.getHours();
+            const finalMinutes = value?.getMinutes();
 
             return (
               <>
@@ -111,7 +91,7 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
                   locale='en'
                   mode='single'
                   visible={isDatePickerOpen}
-                  date={finalDate}
+                  date={value}
                   {...datePickerProps}
                   onDismiss={mergeFunctions(
                     onBlur,
@@ -125,6 +105,7 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
                       typeof finalMinutes === 'number' && date?.setMinutes(finalMinutes);
 
                       onChange(date);
+                      setFieldValue(format(date, dateTimeFormate));
                     },
                     datePickerProps?.onConfirm,
                     closeDatePicker,
@@ -144,12 +125,13 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
                   )}
                   onConfirm={mergeFunctions(
                     ({ hours, minutes }) => {
-                      const date = finalDate ? new Date(finalDate) : new Date();
+                      const date = value ? new Date(value) : new Date();
 
                       date.setHours(hours);
                       date.setMinutes(minutes);
 
                       onChange(date);
+                      setFieldValue(format(date, dateTimeFormate));
                     },
                     onBlur,
                     closeTimePicker,
@@ -158,7 +140,7 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
                 />
                 <View>
                   <MaskedTextInput
-                    value={finalValue}
+                    value={fieldValue}
                     disabled={disabled}
                     mode='outlined'
                     mask={dateTimeMask}
@@ -170,7 +152,19 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
                     activeUnderlineColor={color}
                     placeholderTextColor={color}
                     {...props}
-                    onChangeText={mergeFunctions(onChange, props.onChangeText)}
+                    onChangeText={mergeFunctions(
+                      text => {
+                        const fullText = completeDateStringWithDefault(text);
+
+                        const date = parse(fullText, dateTimeFormate, 0);
+
+                        if (isNaN(date.getDay())) return;
+
+                        onChange(date);
+                      },
+                      setFieldValue,
+                      props.onChangeText
+                    )}
                     ref={mergeRefs([ref, forwardedRef])}
                     right={
                       <TextInput.Icon

@@ -43,9 +43,6 @@ const loginDocument = graphql(`
         email
         phone
         role
-        status
-        createdAt
-        updatedAt
       }
       accessToken
       refreshToken
@@ -87,7 +84,7 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
 
     setUser({
       phone: user.phone ?? undefined,
-      id: user.id ?? Date.now() + '',
+      id: user.id + '' ?? Date.now() + '',
     });
 
     navigate('Main', { screen: 'Profile', params: { screen: 'Account' } });

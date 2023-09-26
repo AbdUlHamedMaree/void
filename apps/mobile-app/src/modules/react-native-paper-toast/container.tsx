@@ -1,15 +1,26 @@
 import { produce } from 'immer';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Snackbar } from 'react-native-paper';
-import { SnackbarModel } from './model';
+import { Snackbar, useTheme } from 'react-native-paper';
+import { SnackbarModel, SnackbarTypeUnion, SnackbarVariantUnion } from './model';
 import { EmitterApi } from './event-emitter';
+import { ThemeProp } from 'react-native-paper/lib/typescript/types';
+
+const defaultThemes: Record<SnackbarTypeUnion, ThemeProp | undefined> = {
+  default: undefined,
+  success: undefined,
+  info: undefined,
+  warning: undefined,
+  error: undefined,
+};
 
 export type PaperToastContainerProps = {
+  variant?: SnackbarVariantUnion;
   children?: React.ReactNode;
 };
 
 export const PaperToastContainer: React.FC<PaperToastContainerProps> = memo(
-  ({ children }) => {
+  ({ variant, children }) => {
+    const theme = useTheme();
     const [snackbars, setSnackbars] = useState<Record<string, SnackbarModel>>({});
     const key = Date.now();
     useEffect(() => {
@@ -53,6 +64,69 @@ export const PaperToastContainer: React.FC<PaperToastContainerProps> = memo(
       }, 50);
     }, []);
 
+    const snackbarThemes = useMemo<
+      Record<SnackbarTypeUnion, ThemeProp | undefined>
+    >(() => {
+      switch (variant) {
+        case 'outlined':
+          return {
+            default: undefined,
+            success: {
+              colors: {
+                inverseOnSurface: theme.colors.primary,
+              },
+            },
+            info: {
+              colors: {
+                inverseOnSurface: theme.colors.secondary,
+              },
+            },
+            warning: {
+              colors: {
+                inverseOnSurface: theme.colors.tertiary,
+              },
+            },
+            error: {
+              colors: {
+                inverseOnSurface: theme.colors.error,
+              },
+            },
+          };
+
+        case 'contained':
+          return {
+            default: undefined,
+            success: {
+              colors: {
+                inverseOnSurface: theme.colors.primary,
+                inverseSurface: theme.colors.primaryContainer,
+              },
+            },
+            info: {
+              colors: {
+                inverseOnSurface: theme.colors.secondary,
+                inverseSurface: theme.colors.secondaryContainer,
+              },
+            },
+            warning: {
+              colors: {
+                inverseOnSurface: theme.colors.tertiary,
+                inverseSurface: theme.colors.tertiaryContainer,
+              },
+            },
+            error: {
+              colors: {
+                inverseOnSurface: theme.colors.error,
+                inverseSurface: theme.colors.errorContainer,
+              },
+            },
+          };
+
+        default:
+          return defaultThemes;
+      }
+    }, [variant, theme]);
+
     const snackbarsJsx = useMemo(
       () =>
         Object.values(snackbars).map(snackbar => (
@@ -60,16 +134,18 @@ export const PaperToastContainer: React.FC<PaperToastContainerProps> = memo(
             key={snackbar.id}
             id={snackbar.id}
             visible={snackbar.visible}
+            action={snackbar.action}
+            theme={snackbarThemes[snackbar.type ?? 'default']}
+            style={{ borderColor: 'red', borderWidth: 2 }}
             onDismiss={() => {
               onDismiss(snackbar.id);
               snackbar.onDismiss?.();
             }}
-            action={snackbar.action}
           >
             {snackbar.message}
           </Snackbar>
         )),
-      [onDismiss, snackbars]
+      [onDismiss, snackbarThemes, snackbars]
     );
 
     return (

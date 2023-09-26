@@ -3,83 +3,174 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Button, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
-import { DateTimeField, dateTimeRegex } from '$components/fields/date-time';
+import { DateTimeField } from '$components/fields/date-time';
 import { TextField } from '$components/fields/text';
 import React, { useCallback, useMemo, useState } from 'react';
-import MapView, { LatLng, Marker } from 'react-native-maps';
+import MapView, { MapPressEvent, Marker } from 'react-native-maps';
 import { PaperBottomSheet } from '$components/dumb/paper-bottom-sheet';
 import { useAtomValue } from 'jotai';
 import { mapRegionAtom } from '$atoms/map-region';
 import { spacing } from '$theme/spacing';
 import { TripMapMarkerCard } from '$components/dumb/trip-map-marker-card';
 import Geocoder from 'react-native-geocoding';
+import { number, object, string, date, coerce } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createKeyGetter } from '$libs/react-hook-form/create-key-getter';
+import { getAddressComponent } from '$libs/geocoding/get-adress-component';
+import { MaskedTextField } from '$components/fields/masked-text';
+import { graphql } from '$gql';
+import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenWrapper } from '$components/smart/screen-wrapper';
+
+const createTripDocument = graphql(`
+  mutation CreateTripMutation($createTripPayload: CreateTripIt!) {
+    createTrip(payload: $createTripPayload) {
+      id
+    }
+  }
+`);
+
+const addressValidation = object({
+  addressLineOne: string(),
+  addressLineTwo: string(),
+  area: string(),
+  city: string(),
+  country: string(),
+  postCode: string(),
+});
+
+const validationSchema = object({
+  pickupLatitude: number(),
+  pickupLongitude: number(),
+  pickupAddress: addressValidation,
+
+  dropoffLatitude: number(),
+  dropoffLongitude: number(),
+  dropoffAddress: addressValidation,
+
+  capacity: coerce.number(),
+  plannedAt: date(),
+  // type: union([literal('one-time'), literal('routine')]),
+});
+
+type ValidationSchema = Zod.infer<typeof validationSchema>;
+
+const key = createKeyGetter<ValidationSchema>();
 
 export type CreateNewTripScreenProps = {
   children?: React.ReactNode;
 };
 
 export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
+  const { navigate } = useNavigation();
+
+  const createTripMutation = useGraphQLMutation(createTripDocument);
+
   const theme = useTheme();
   const initialMapRegion = useAtomValue(mapRegionAtom);
 
   const [activeButton, setActiveButton] = useState<'pickup' | 'dropoff'>('pickup');
-  const [pickupLocation, setPickupLocation] = useState<LatLng>();
-  const [dropoffLocation, setDropoffLocation] = useState<LatLng>();
 
-  const methods = useForm({
+  const methods = useForm<ValidationSchema>({
     defaultValues: {
-      pickup: '',
-      dropoff: '',
-      at: null as Date | string | null,
-    },
+      pickupLatitude: null,
+      pickupLongitude: null,
+      pickupAddress: null,
+
+      dropoffLatitude: null,
+      dropoffLongitude: null,
+      dropoffAddress: null,
+
+      capacity: null,
+      plannedAt: null,
+    } as any,
+    resolver: zodResolver(validationSchema),
   });
 
-  const { getValues, setValue } = methods;
+  const { getValues, setValue, watch, resetField } = methods;
 
-  const onSubmit = methods.handleSubmit(data => console.log(data));
+  const onSubmit = methods.handleSubmit(async data => {
+    try {
+      await createTripMutation.mutateAsync({
+        createTripPayload: {
+          ...data,
+          type: 'in_app',
+        },
+      });
+      navigate('Main', { screen: 'Home' });
+    } catch (err) {
+      console.error(err);
+    }
+  });
 
   const snapPoints = useMemo(() => [30, '80%'], []);
 
+  const [pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude] = watch([
+    'pickupLatitude',
+    'pickupLongitude',
+    'dropoffLatitude',
+    'dropoffLongitude',
+  ]);
+
+  const pickupLocation = useMemo(
+    () =>
+      pickupLatitude && pickupLongitude
+        ? { latitude: pickupLatitude, longitude: pickupLongitude }
+        : undefined,
+    [pickupLatitude, pickupLongitude]
+  );
+
+  const dropoffLocation = useMemo(
+    () =>
+      dropoffLatitude && dropoffLongitude
+        ? { latitude: dropoffLatitude, longitude: dropoffLongitude }
+        : undefined,
+    [dropoffLatitude, dropoffLongitude]
+  );
+
+  const onMapPress = useCallback(
+    ({ nativeEvent: { coordinate } }: MapPressEvent) => {
+      if (activeButton === 'pickup') {
+        setValue('pickupLatitude', coordinate.latitude);
+        setValue('pickupLongitude', coordinate.longitude);
+        resetField('pickupAddress');
+      } else {
+        setValue('dropoffLatitude', coordinate.latitude);
+        setValue('dropoffLongitude', coordinate.longitude);
+        resetField('dropoffAddress');
+      }
+    },
+    [activeButton, resetField, setValue]
+  );
+
   const onSnapChange = useCallback(
     (index: number) => {
-      const values = getValues();
+      // if not open, stop.
+      if (index !== 1) return;
 
-      if (index !== 1)
-        // if not open, stop.
-        return;
-      if (values.pickup === '' && pickupLocation)
+      const pickupAddress = getValues('pickupAddress');
+      const dropoffAddress = getValues('dropoffAddress');
+
+      if (!pickupAddress && pickupLocation)
         Geocoder.from(pickupLocation)
-          .then(date => {
-            const result = date.results[0];
-
-            setValue('pickup', result.formatted_address);
-          })
+          .then(response => setValue('pickupAddress', getAddress(response)))
           .catch(err => console.error(err));
 
-      if (values.dropoff === '' && dropoffLocation)
+      if (!dropoffAddress && dropoffLocation)
         Geocoder.from(dropoffLocation)
-          .then(date => {
-            const result = date.results[0];
-
-            setValue('dropoff', result.formatted_address);
-          })
+          .then(response => setValue('dropoffAddress', getAddress(response)))
           .catch(err => console.error(err));
     },
-    [dropoffLocation, getValues, pickupLocation, setValue]
+    [dropoffLocation, pickupLocation, getValues, setValue]
   );
 
   return (
-    <SafeAreaView style={[commonStyles.flexFull]}>
+    <ScreenWrapper disablePadding>
       <MapView
         style={[commonStyles.flexFull]}
         initialRegion={initialMapRegion}
-        onPress={({ nativeEvent: { coordinate } }) => {
-          activeButton === 'pickup'
-            ? setPickupLocation(coordinate)
-            : setDropoffLocation(coordinate);
-
-          methods.setValue(activeButton, '');
-        }}
+        onPress={onMapPress}
       >
         {pickupLocation && (
           <Marker coordinate={pickupLocation}>
@@ -95,6 +186,15 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
             </TripMapMarkerCard>
           </Marker>
         )}
+        {/* {pickupLocation && dropoffLocation && (
+          <MapViewDirections
+            origin={pickupLocation}
+            destination={dropoffLocation}
+            apikey={GOOGLE_SERVICES_API}
+            strokeWidth={4}
+            strokeColor='#0005'
+          />
+        )} */}
       </MapView>
 
       <View style={styles.segmentedButtonsContainer}>
@@ -122,30 +222,46 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
           ]}
         >
           <FormProvider {...methods}>
-            <TextField label='Pickup' name='pickup' disabled />
-            <TextField label='Dropoff' name='dropoff' disabled />
-
-            <DateTimeField
-              name='at'
-              label='Date'
-              rules={{
-                required: 'Date is required!',
-                pattern: {
-                  message: 'not valid date',
-                  value: dateTimeRegex,
-                },
-              }}
+            <TextField
+              label='Pickup'
+              name={key('pickupAddress.addressLineOne')}
+              disabled
             />
+
+            <TextField
+              label='Dropoff'
+              name={key('dropoffAddress.addressLineOne')}
+              disabled
+            />
+
+            <MaskedTextField
+              label='Capacity'
+              name={key('capacity')}
+              mask='99'
+              keyboardType='number-pad'
+            />
+
+            <DateTimeField name={key('plannedAt')} label='Planned At' />
+
+            {/* <RadioButtonGroupField name={key('type')}>
+              <RadioButton.Item label='One time trip' value='one-time' />
+              <RadioButton.Item label='Routine trip' value='routine' />
+            </RadioButtonGroupField> */}
 
             <View style={{ flex: 1 }} />
 
-            <Button mode='contained' onPress={onSubmit}>
+            <Button
+              mode='contained'
+              onPress={onSubmit}
+              loading={createTripMutation.status === 'loading'}
+              disabled={createTripMutation.status === 'loading'}
+            >
               Create
             </Button>
           </FormProvider>
         </SafeAreaView>
       </PaperBottomSheet>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 
@@ -157,4 +273,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+});
+
+const getAddress = (response: Geocoder.GeocoderResponse) => ({
+  country: getAddressComponent(response, 'country'),
+  city: getAddressComponent(response, 'locality'),
+  area: getAddressComponent(
+    response,
+    'sublocality',
+    getAddressComponent(response, 'neighborhood')
+  ),
+  addressLineOne: response.results[0].formatted_address,
+  addressLineTwo: response.results[0].formatted_address,
+  postCode: 'UNKNOWN',
 });

@@ -72,9 +72,7 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
       storage.accessToken.set(accessToken);
       storage.refreshToken.set(refreshToken);
 
-      console.log(user);
-
-      setUser({ id: user.id!, phone: user.phone ?? undefined });
+      setUser({ id: user.id + '', phone: user.phone ?? undefined });
       navigate('Main', {
         screen: 'Profile',
         params: {

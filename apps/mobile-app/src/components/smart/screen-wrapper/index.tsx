@@ -42,7 +42,7 @@ export const ScreenWrapper = memo(
           ]}
         >
           {children}
-          <PaperToastContainer />
+          <PaperToastContainer variant='contained' />
         </SafeAreaView>
       );
     }

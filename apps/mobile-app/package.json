@@ -47,6 +47,8 @@
     "@react-native-community/netinfo": "*",
     "@tanstack/react-query": "*",
     "graphql-request": "*",
-    "react-native-permissions": "*"
+    "react-native-permissions": "*",
+    "@graphql-codegen/cli": "*",
+    "react-native-maps-directions": "*"
   }
 }

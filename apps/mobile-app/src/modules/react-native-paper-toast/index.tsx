@@ -33,6 +33,7 @@ const createTypedToastFn =
 
 export const toast = createTypedToastFn('default') as ToastFn;
 toast.default = createTypedToastFn('default');
+toast.success = createTypedToastFn('success');
 toast.info = createTypedToastFn('info');
 toast.warning = createTypedToastFn('warning');
 toast.error = createTypedToastFn('error');

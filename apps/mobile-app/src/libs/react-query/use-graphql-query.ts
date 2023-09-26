@@ -1,29 +1,38 @@
-import { request } from 'graphql-request';
 import { type TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { UseQueryOptions, useQuery } from '@tanstack/react-query';
-import { API_BASE_URL } from '@env';
+import { GraphQlRequestAxiosConfig, graphqlRequest } from '$libs/axios/graphql';
 
-export const useGraphQLQuery = <TDate, TVariables>(
+export const useGraphQLQuery = <
+  TDate,
+  TVariables = Record<string, unknown>,
+  TKey extends unknown[] = TVariables extends Record<string, unknown>
+    ? [string, TVariables]
+    : [string, undefined],
+>(
   document: TypedDocumentNode<TDate, TVariables>,
-  ...[variables, options]: TVariables extends Record<string, never>
+  ...[variables, options, axiosConfig]: TVariables extends Record<string, unknown>
     ? [
-        undefined,
-        Omit<
-          UseQueryOptions<TDate, unknown, TDate, [string, TVariables?]>,
+        TVariables?,
+        (Omit<
+          UseQueryOptions<TDate, unknown, TDate, TKey>,
           'queryKey' | 'queryFn' | 'initialData'
-        > & { initialData?: () => undefined },
+        > & { initialData?: () => undefined })?,
+        GraphQlRequestAxiosConfig?,
       ]
     : [
         TVariables,
-        Omit<
-          UseQueryOptions<TDate, unknown, TDate, [string, TVariables?]>,
+        (Omit<
+          UseQueryOptions<TDate, unknown, TDate, TKey>,
           'queryKey' | 'queryFn' | 'initialData'
-        > & { initialData?: () => undefined },
+        > & { initialData?: () => undefined })?,
+        GraphQlRequestAxiosConfig?,
       ]
 ) =>
-  useQuery<TDate, unknown, TDate, [string, TVariables?]>({
+  useQuery<TDate, unknown, TDate, TKey>({
     ...options,
-    queryKey: [(document.definitions[0] as any).name.value, variables],
+    queryKey: [(document.definitions[0] as any).name.value, variables] as TKey,
     queryFn: ({ queryKey }) =>
-      request(API_BASE_URL + '/graphql', document, queryKey[1] ? queryKey[1] : undefined),
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      graphqlRequest(document, queryKey[1], axiosConfig),
   });
