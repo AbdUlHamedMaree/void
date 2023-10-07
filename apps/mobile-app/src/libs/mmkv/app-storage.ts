@@ -25,10 +25,10 @@ export const appStorage = {
       return fallbackValue;
     }
   },
-  delete: mmkvInstance.delete,
-  clearAll: mmkvInstance.clearAll,
-  contains: mmkvInstance.contains,
-  getAllKeys: mmkvInstance.getAllKeys,
+  delete: mmkvInstance.delete.bind(mmkvInstance),
+  clearAll: mmkvInstance.clearAll.bind(mmkvInstance),
+  contains: mmkvInstance.contains.bind(mmkvInstance),
+  getAllKeys: mmkvInstance.getAllKeys.bind(mmkvInstance),
   subscribe: <T>(key: string, cb: Callback<T>) => {
     const listeners = (subscribers[key] = subscribers[key] || []);
     listeners.push(cb);

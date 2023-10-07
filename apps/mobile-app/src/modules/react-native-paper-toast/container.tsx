@@ -1,11 +1,25 @@
 import { produce } from 'immer';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Snackbar, useTheme } from 'react-native-paper';
-import { SnackbarModel, SnackbarTypeUnion, SnackbarVariantUnion } from './model';
+import { Snackbar } from 'react-native-paper';
+import {
+  SnackbarModel,
+  SnackbarTypeUnion,
+  SnackbarVariantUnion,
+  ToastOptionsWithoutMessageModel,
+} from './model';
 import { EmitterApi } from './event-emitter';
 import { ThemeProp } from 'react-native-paper/lib/typescript/types';
+import { useAppTheme } from '$theme/hook';
+import { StyleProp, ViewStyle } from 'react-native';
+import merge from 'deepmerge';
+import { RequiredKeys } from '$types/required-keys';
 
-const defaultThemes: Record<SnackbarTypeUnion, ThemeProp | undefined> = {
+type SnackbarVariantTypeValue<T> = Record<
+  SnackbarVariantUnion,
+  Record<SnackbarTypeUnion, T>
+>;
+
+const defaultTypeValue: SnackbarVariantTypeValue<undefined>[SnackbarVariantUnion] = {
   default: undefined,
   success: undefined,
   info: undefined,
@@ -13,17 +27,30 @@ const defaultThemes: Record<SnackbarTypeUnion, ThemeProp | undefined> = {
   error: undefined,
 };
 
-export type PaperToastContainerProps = {
-  variant?: SnackbarVariantUnion;
-  children?: React.ReactNode;
+type ToastFinalOptionsWithoutMessageModel = RequiredKeys<
+  ToastOptionsWithoutMessageModel,
+  'duration' | 'variant' | 'type'
+>;
+
+const defaultSnackbarOptions: ToastFinalOptionsWithoutMessageModel = {
+  duration: 4000,
+  variant: 'contained',
+  type: 'default',
 };
 
+export type PaperToastContainerProps = {
+  children?: React.ReactNode;
+} & ToastOptionsWithoutMessageModel;
+
 export const PaperToastContainer: React.FC<PaperToastContainerProps> = memo(
-  ({ variant, children }) => {
-    const theme = useTheme();
+  ({ children, ...baseOptions }) => {
+    const theme = useAppTheme();
+
     const [snackbars, setSnackbars] = useState<Record<string, SnackbarModel>>({});
-    const key = Date.now();
+
     useEffect(() => {
+      const key = Date.now();
+
       EmitterApi.onSnackbar.push([
         (newSnackbar: SnackbarModel) => {
           setSnackbars(v => ({ ...v, [newSnackbar.id]: newSnackbar }));
@@ -46,7 +73,7 @@ export const PaperToastContainer: React.FC<PaperToastContainerProps> = memo(
 
         EmitterApi.onSnackbar.splice(i, 1);
       };
-    }, [key]);
+    }, []);
 
     const onDismiss = useCallback((id: string) => {
       setSnackbars(
@@ -64,88 +91,104 @@ export const PaperToastContainer: React.FC<PaperToastContainerProps> = memo(
       }, 50);
     }, []);
 
-    const snackbarThemes = useMemo<
-      Record<SnackbarTypeUnion, ThemeProp | undefined>
-    >(() => {
-      switch (variant) {
-        case 'outlined':
-          return {
-            default: undefined,
-            success: {
-              colors: {
-                inverseOnSurface: theme.colors.primary,
-              },
+    const snackbarThemes = useMemo<SnackbarVariantTypeValue<ThemeProp | undefined>>(
+      () => ({
+        outlined: defaultTypeValue,
+        contained: {
+          default: undefined,
+          success: {
+            colors: {
+              inverseOnSurface: theme.colors.success,
+              inverseSurface: theme.colors.successContainer,
             },
-            info: {
-              colors: {
-                inverseOnSurface: theme.colors.secondary,
-              },
+          },
+          info: {
+            colors: {
+              inverseOnSurface: theme.colors.info,
+              inverseSurface: theme.colors.infoContainer,
             },
-            warning: {
-              colors: {
-                inverseOnSurface: theme.colors.tertiary,
-              },
+          },
+          warning: {
+            colors: {
+              inverseOnSurface: theme.colors.warning,
+              inverseSurface: theme.colors.warningContainer,
             },
-            error: {
-              colors: {
-                inverseOnSurface: theme.colors.error,
-              },
+          },
+          error: {
+            colors: {
+              inverseOnSurface: theme.colors.error,
+              inverseSurface: theme.colors.errorContainer,
             },
-          };
+          },
+        },
+      }),
+      [
+        theme.colors.error,
+        theme.colors.errorContainer,
+        theme.colors.info,
+        theme.colors.infoContainer,
+        theme.colors.success,
+        theme.colors.successContainer,
+        theme.colors.warning,
+        theme.colors.warningContainer,
+      ]
+    );
 
-        case 'contained':
-          return {
-            default: undefined,
-            success: {
-              colors: {
-                inverseOnSurface: theme.colors.primary,
-                inverseSurface: theme.colors.primaryContainer,
-              },
-            },
-            info: {
-              colors: {
-                inverseOnSurface: theme.colors.secondary,
-                inverseSurface: theme.colors.secondaryContainer,
-              },
-            },
-            warning: {
-              colors: {
-                inverseOnSurface: theme.colors.tertiary,
-                inverseSurface: theme.colors.tertiaryContainer,
-              },
-            },
-            error: {
-              colors: {
-                inverseOnSurface: theme.colors.error,
-                inverseSurface: theme.colors.errorContainer,
-              },
-            },
-          };
-
-        default:
-          return defaultThemes;
-      }
-    }, [variant, theme]);
+    const snackbarStyles = useMemo<
+      SnackbarVariantTypeValue<StyleProp<ViewStyle> | undefined>
+    >(
+      () => ({
+        contained: defaultTypeValue,
+        outlined: {
+          default: undefined,
+          success: {
+            borderColor: theme.colors.success,
+            borderWidth: 1,
+          },
+          info: {
+            borderColor: theme.colors.info,
+            borderWidth: 1,
+          },
+          warning: {
+            borderColor: theme.colors.warning,
+            borderWidth: 1,
+          },
+          error: {
+            borderColor: theme.colors.error,
+            borderWidth: 1,
+          },
+        },
+      }),
+      [theme.colors.error, theme.colors.info, theme.colors.success, theme.colors.warning]
+    );
 
     const snackbarsJsx = useMemo(
       () =>
-        Object.values(snackbars).map(snackbar => (
-          <Snackbar
-            key={snackbar.id}
-            id={snackbar.id}
-            visible={snackbar.visible}
-            action={snackbar.action}
-            theme={snackbarThemes[snackbar.type ?? 'default']}
-            style={{ borderColor: 'red', borderWidth: 2 }}
-            onDismiss={() => {
-              onDismiss(snackbar.id);
-              snackbar.onDismiss?.();
-            }}
-          >
-            {snackbar.message}
-          </Snackbar>
-        )),
-      [onDismiss, snackbarThemes, snackbars]
+        Object.values(snackbars).map(snackbar => {
+          const options = merge.all<ToastFinalOptionsWithoutMessageModel>([
+            defaultSnackbarOptions,
+            baseOptions,
+            snackbar,
+          ]);
+          return (
+            <Snackbar
+              {...options}
+              key={snackbar.id}
+              id={snackbar.id}
+              visible={snackbar.visible}
+              action={options.action}
+              theme={snackbarThemes[options.variant][options.type]}
+              style={snackbarStyles[options.variant][options.type]}
+              onDismiss={() => {
+                onDismiss(snackbar.id);
+                snackbar.onDismiss?.();
+              }}
+            >
+              {snackbar.message}
+            </Snackbar>
+          );
+        }),
+      [baseOptions, onDismiss, snackbarStyles, snackbarThemes, snackbars]
     );
 
     return (

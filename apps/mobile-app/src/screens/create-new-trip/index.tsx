@@ -1,7 +1,7 @@
 import { commonStyles } from '$styles/common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Button, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { Button, SegmentedButtons, Text } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
 import { DateTimeField } from '$components/fields/date-time';
 import { TextField } from '$components/fields/text';
@@ -18,18 +18,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createKeyGetter } from '$libs/react-hook-form/create-key-getter';
 import { getAddressComponent } from '$libs/geocoding/get-adress-component';
 import { MaskedTextField } from '$components/fields/masked-text';
-import { graphql } from '$gql';
-import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
-
-const createTripDocument = graphql(`
-  mutation CreateTripMutation($createTripPayload: CreateTripIt!) {
-    createTrip(payload: $createTripPayload) {
-      id
-    }
-  }
-`);
+import { useAppTheme } from '$theme/hook';
+import { useCreateTripMutation } from '$apis/trips';
+import { toast } from '$modules/react-native-paper-toast';
 
 const addressValidation = object({
   addressLineOne: string(),
@@ -65,9 +58,9 @@ export type CreateNewTripScreenProps = {
 export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
   const { navigate } = useNavigation();
 
-  const createTripMutation = useGraphQLMutation(createTripDocument);
+  const createTripMutation = useCreateTripMutation();
 
-  const theme = useTheme();
+  const theme = useAppTheme();
   const initialMapRegion = useAtomValue(mapRegionAtom);
 
   const [activeButton, setActiveButton] = useState<'pickup' | 'dropoff'>('pickup');
@@ -96,15 +89,17 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
         createTripPayload: {
           ...data,
           type: 'in_app',
+          category: 'one_time',
         },
       });
       navigate('Main', { screen: 'Home' });
+      toast.success('Trip created successfully!');
     } catch (err) {
       console.error(err);
     }
   });
 
-  const snapPoints = useMemo(() => [30, '80%'], []);
+  const snapPoints = useMemo(() => ['20%', '80%'], []);
 
   const [pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude] = watch([
     'pickupLatitude',

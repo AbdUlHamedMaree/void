@@ -2,12 +2,13 @@ import {
   MaskedTextInput,
   MaskedTextInputProps,
 } from '$components/dumb/masked-text-input';
+import { useAppTheme } from '$theme/hook';
 import { mergeFunctions } from '$tools/merge-functions';
 import React, { forwardRef, memo } from 'react';
 import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
 import { mergeRefs } from 'react-merge-refs';
 import { View } from 'react-native';
-import { HelperText, useTheme } from 'react-native-paper';
+import { HelperText } from 'react-native-paper';
 
 export type MaskedTextFieldProps = {
   //
@@ -21,7 +22,7 @@ export const MaskedTextField = memo(
       forwardedRef
     ) {
       const { control } = useFormContext();
-      const theme = useTheme();
+      const theme = useAppTheme();
 
       return (
         <Controller

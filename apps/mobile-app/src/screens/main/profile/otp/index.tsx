@@ -2,19 +2,19 @@ import { userAtom } from '$atoms/user';
 import { PaperButton } from '$components/dumb/paper-button';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
-import { graphql } from '$gql';
 import { storage } from '$libs/mmkv';
-import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
 import { ProfileStackScreenProps } from '$navigation/main/profile/model';
 import { commonStyles } from '$styles/common';
+import { useAppTheme } from '$theme/hook';
 import { spacing } from '$theme/spacing';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSetAtom } from 'jotai';
 import { FormProvider, useForm } from 'react-hook-form';
 import { View } from 'react-native';
-import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
+import { Button, Divider, IconButton, Text } from 'react-native-paper';
 import { object, string } from 'zod';
+import { useVerifyOTPMutation } from '$apis/otp';
 
 const validationSchema = object({
   otp: string({ required_error: 'Code is required field' }).length(
@@ -22,20 +22,6 @@ const validationSchema = object({
     'should be 4 digits'
   ),
 });
-
-const verifyOTPDocument = graphql(`
-  mutation VeryOTPMutation($verifyOTPPayload: OtpVerificationPayloadIt!) {
-    verifyOtp(payload: $verifyOTPPayload) {
-      accessToken
-      refreshToken
-      user {
-        id
-        email
-        phone
-      }
-    }
-  }
-`);
 
 export type MainProfileOTPScreenProps = {
   //
@@ -45,7 +31,7 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
   const { navigate } = useNavigation();
   const setUser = useSetAtom(userAtom);
 
-  const verifyOTPMutation = useGraphQLMutation(verifyOTPDocument);
+  const verifyOTPMutation = useVerifyOTPMutation();
 
   const methods = useForm({
     defaultValues: {
@@ -58,7 +44,7 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
     params: { phone, otp },
   } = useRoute<ProfileStackScreenProps<'OTP'>['route']>();
 
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   const handleSubmit = methods.handleSubmit(async value => {
     try {

@@ -1,17 +1,19 @@
 import { MaterialCommunityIcon } from '$components/icons';
+import { useAppTheme } from '$theme/hook';
+import { spacing } from '$theme/spacing';
 import { View } from 'react-native';
-import { Card, useTheme } from 'react-native-paper';
+import { Card } from 'react-native-paper';
 
 export type TripMapMarkerCardProps = {
   children?: React.ReactNode;
 };
 
 export const TripMapMarkerCard: React.FC<TripMapMarkerCardProps> = ({ children }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   return (
     <View>
-      <Card style={{ padding: 10 }}>{children}</Card>
+      <Card style={{ padding: spacing.md }}>{children}</Card>
       <View style={{ alignItems: 'center' }}>
         <MaterialCommunityIcon
           name='triangle'

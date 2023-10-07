@@ -1,6 +1,7 @@
+import { useAppTheme } from '$theme/hook';
 import { spacing } from '$theme/spacing';
 import React, { forwardRef, memo, useMemo } from 'react';
-import { Button, ButtonProps, Text, TextProps, useTheme } from 'react-native-paper';
+import { Button, ButtonProps, Text, TextProps } from 'react-native-paper';
 
 export type PaperButtonSizeUnion = 'small' | 'medium' | 'large';
 
@@ -24,7 +25,7 @@ export const PaperButton = memo(
     },
     ref
   ) {
-    const theme = useTheme();
+    const theme = useAppTheme();
 
     const borderRadius = useMemo(() => {
       switch (radius) {

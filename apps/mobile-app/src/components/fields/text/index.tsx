@@ -2,8 +2,9 @@ import { mergeFunctions } from '$tools/merge-functions';
 import React, { forwardRef, memo } from 'react';
 import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
 import { View } from 'react-native';
-import { HelperText, TextInput, TextInputProps, useTheme } from 'react-native-paper';
+import { HelperText, TextInput, TextInputProps } from 'react-native-paper';
 import { mergeRefs } from 'react-merge-refs';
+import { useAppTheme } from '$theme/hook';
 
 export type TextFieldProps = {
   //
@@ -16,7 +17,7 @@ export const TextField = memo(
     forwardedRef
   ) {
     const { control } = useFormContext();
-    const theme = useTheme();
+    const theme = useAppTheme();
 
     return (
       <Controller

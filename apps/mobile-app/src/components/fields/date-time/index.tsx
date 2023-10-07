@@ -2,13 +2,14 @@ import {
   MaskedTextInput,
   MaskedTextInputProps,
 } from '$components/dumb/masked-text-input';
+import { useAppTheme } from '$theme/hook';
 import { mergeFunctions } from '$tools/merge-functions';
 import { format, parse } from 'date-fns';
 import React, { forwardRef, memo, useState } from 'react';
 import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
 import { mergeRefs } from 'react-merge-refs';
 import { View } from 'react-native';
-import { HelperText, TextInput, useTheme } from 'react-native-paper';
+import { HelperText, TextInput } from 'react-native-paper';
 import {
   DatePickerModal,
   DatePickerModalSingleProps,
@@ -55,7 +56,7 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
       forwardedRef
     ) {
       const { control } = useFormContext();
-      const theme = useTheme();
+      const theme = useAppTheme();
 
       const [fieldValue, setFieldValue] = useState('');
 

@@ -1,22 +1,16 @@
+import { useSendOtpMutation } from '$apis/otp';
+import { useSignUpMutation } from '$apis/user';
 import { PaperButton } from '$components/dumb/paper-button';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { TextField } from '$components/fields/text';
-import { graphql } from '$gql';
-import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
 import { commonStyles } from '$styles/common';
+import { useAppTheme } from '$theme/hook';
 import { spacing } from '$theme/spacing';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation } from '@react-navigation/native';
 import { FormProvider, useForm } from 'react-hook-form';
 import { View } from 'react-native';
-import {
-  Button,
-  Divider,
-  IconButton,
-  Text,
-  TextInput,
-  useTheme,
-} from 'react-native-paper';
+import { Button, Divider, IconButton, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { object, string } from 'zod';
 
@@ -35,32 +29,16 @@ const validationSchema = object({
   path: ['repeatPassword'],
 });
 
-const signUpDocument = graphql(`
-  mutation SignUpMutation($signUpPayload: SignupAppUsersIt!) {
-    signup(payload: $signUpPayload) {
-      id
-    }
-  }
-`);
-
-const sendOTPDocument = graphql(`
-  mutation SendOTPMutation($sendOTPPayload: OtpLoginPayloadIt!) {
-    sendOtp(payload: $sendOTPPayload) {
-      message
-    }
-  }
-`);
-
 export type MainProfileSignUpScreenProps = {
   //
 };
 
 export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = () => {
   const { navigate } = useNavigation();
-  const theme = useTheme();
+  const theme = useAppTheme();
 
-  const signUpMutation = useGraphQLMutation(signUpDocument);
-  const sendOTPMutation = useGraphQLMutation(sendOTPDocument);
+  const signUpMutation = useSignUpMutation();
+  const sendOTPMutation = useSendOtpMutation();
 
   const methods = useForm({
     defaultValues: {
@@ -78,8 +56,8 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
       await signUpMutation.mutateAsync({
         signUpPayload: {
           phone: phoneWithCountryCode,
-          email: 'b@a.com',
-          name: 'hmib',
+          email: 'a@a.com',
+          name: 'hmid',
           password: values.password,
           role: 'user',
         },
@@ -94,7 +72,9 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
       });
 
       // *(1234)*
-      const otp = message.substring(message.indexOf('('), message.indexOf(')'));
+      const otp = message.substring(message.indexOf('(') + 1, message.indexOf(')'));
+
+      console.log('otp:', otp);
 
       navigate('Main', {
         screen: 'Profile',

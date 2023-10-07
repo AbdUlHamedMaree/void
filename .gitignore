@@ -330,3 +330,4 @@ apps/mobile-app-e2e/artifacts
 TODO
 
 **/.env*.local
+graphql.schema.json

@@ -6,23 +6,17 @@ import { useNavigation } from '@react-navigation/native';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { View } from 'react-native';
-import {
-  Button,
-  Divider,
-  IconButton,
-  Text,
-  TextInput,
-  useTheme,
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button, Divider, IconButton, Text, TextInput } from 'react-native-paper';
 import { object, string } from 'zod';
 import { useSetAtom } from 'jotai';
 import { userAtom } from '$atoms/user';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { PaperButton } from '$components/dumb/paper-button';
-import { graphql } from '$gql';
-import { useGraphQLMutation } from '$libs/react-query/use-graphql-mutation';
 import { storage } from '$libs/mmkv';
+import { useAppTheme } from '$theme/hook';
+import { ScreenWrapper } from '$components/smart/screen-wrapper';
+import { isAxiosError } from 'axios';
+import { useLoginMutation } from '$apis/user';
 
 const validationSchema = object({
   phone: string({ required_error: 'Phone is required field' }).regex(
@@ -35,28 +29,15 @@ const validationSchema = object({
   ),
 });
 
-const loginDocument = graphql(`
-  mutation LoginMutation($loginPayload: LoginPayloadIt!) {
-    login(payload: $loginPayload) {
-      user {
-        id
-        email
-        phone
-        role
-      }
-      accessToken
-      refreshToken
-    }
-  }
-`);
-
 export type MainProfileLoginScreenProps = {
   //
 };
 
 export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () => {
-  const loginMutation = useGraphQLMutation(loginDocument);
+  const loginMutation = useLoginMutation();
   const setUser = useSetAtom(userAtom);
+
+  storage.accessToken.get();
 
   const methods = useForm({
     defaultValues: {
@@ -68,36 +49,41 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
 
   const { navigate } = useNavigation();
 
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   const handleSubmit = methods.handleSubmit(async values => {
-    const phoneWithCountryCode = '971' + values.phone;
+    try {
+      const phoneWithCountryCode = '971' + values.phone;
 
-    const {
-      login: { accessToken, refreshToken, user },
-    } = await loginMutation.mutateAsync({
-      loginPayload: { username: phoneWithCountryCode, password: values.password },
-    });
+      const {
+        login: { accessToken, refreshToken, user },
+      } = await loginMutation.mutateAsync({
+        loginPayload: { username: phoneWithCountryCode, password: values.password },
+      });
 
-    storage.accessToken.set(accessToken);
-    storage.refreshToken.set(refreshToken);
+      storage.accessToken.set(accessToken);
+      storage.refreshToken.set(refreshToken);
 
-    setUser({
-      phone: user.phone ?? undefined,
-      id: user.id + '' ?? Date.now() + '',
-    });
+      setUser({
+        phone: user.phone ?? undefined,
+        id: user.id + '' ?? Date.now() + '',
+      });
 
-    navigate('Main', { screen: 'Profile', params: { screen: 'Account' } });
+      navigate('Main', { screen: 'Profile', params: { screen: 'Account' } });
+    } catch (err) {
+      console.error(err);
+
+      if (isAxiosError(err)) {
+        toast.error('Invalid Credentials!');
+        return;
+      }
+
+      toast.error('Unknown Error!');
+    }
   });
 
   return (
-    <SafeAreaView
-      style={[
-        commonStyles.flexFull,
-        commonStyles.justifyCenter,
-        commonStyles.screenPadding,
-      ]}
-    >
+    <ScreenWrapper verticalCenter>
       <Text variant='displayMedium' style={commonStyles.textCenter}>
         Login Now
       </Text>
@@ -137,6 +123,7 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
           padding: spacing.sm,
           marginTop: spacing.xl,
         }}
+        loading={loginMutation.isLoading}
       >
         Login
       </PaperButton>
@@ -169,14 +156,9 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
           paddingTop: spacing.lg,
         }}
       >
-        <IconButton
-          icon='google'
-          mode='outlined'
-          size={36}
-          onPress={() => toast.info('pizza')}
-        />
+        <IconButton icon='google' mode='outlined' size={36} onPress={() => {}} />
       </View>
       <PaperToastContainer />
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };

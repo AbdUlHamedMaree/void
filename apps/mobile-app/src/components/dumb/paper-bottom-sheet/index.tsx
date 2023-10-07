@@ -1,13 +1,13 @@
+import { useAppTheme } from '$theme/hook';
 import { shadowsStyles } from '$theme/shadows';
 import BottomSheet, { BottomSheetProps } from '@gorhom/bottom-sheet';
 import { forwardRef, memo } from 'react';
-import { useTheme } from 'react-native-paper';
 
 export type PaperBottomSheetProps = BottomSheetProps;
 
 export const PaperBottomSheet = memo(
   forwardRef<BottomSheet, PaperBottomSheetProps>(function PaperBottomSheet(props, ref) {
-    const theme = useTheme();
+    const theme = useAppTheme();
 
     if (theme.dark) {
       return (

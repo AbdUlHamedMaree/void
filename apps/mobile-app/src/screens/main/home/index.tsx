@@ -1,139 +1,114 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 import { commonStyles } from '$styles/common';
 import { useAtom } from 'jotai/react';
 import { mapRegionAtom } from '$atoms/map-region';
 import { useAppColorSchema } from '$hooks/use-app-color-schema';
-import { graphql } from '$gql';
-import { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { TripMapMarkerCard } from '$components/dumb/trip-map-marker-card';
-import { Text } from 'react-native-paper';
-import { useGraphQLQuery } from '$libs/react-query/use-graphql-query';
+import { useRefreshOnFocus } from '$libs/react-query/use-refetch-on-screen-focus';
+import { ScreenWrapper } from '$components/smart/screen-wrapper';
+import { useMapTripsQuery } from '$apis/trips';
+import { MaterialCommunityIcon } from '$components/icons';
+import { IDUnion } from '$models/id';
 
-const tripsDocument = graphql(`
-  query HomeTripsQuery($tripsQueryMeta: MetaRequest!) {
-    trips(meta: $tripsQueryMeta) {
-      items {
-        id
-        capacity
-        occupiedSeats
-        status
-        seatsStatus
-        type
-        createdById
-
-        timeline {
-          id
-          latitude
-          longitude
-          occupiedSeats
-          status
-        }
-
-        passengers {
-          id
-          email
-          phone
-        }
-
-        reservations {
-          userId
-          poolerType
-          requestedSeatsCount
-        }
-
-        driver {
-          id
-          email
-          phone
-        }
-
-        pickupAddress {
-          addressLineOne
-          addressLineTwo
-          area
-          city
-          country
-          postCode
-        }
-        pickupLatitude
-        pickupLongitude
-
-        dropoffAddress {
-          addressLineOne
-          addressLineTwo
-          area
-          city
-          country
-          postCode
-        }
-        dropoffLatitude
-        dropoffLongitude
-      }
-      meta {
-        limit
-        page
-        totalCount
-        totalPages
-      }
-    }
-  }
-`);
+import MapViewDirections from 'react-native-maps-directions';
+import { dropoffToLatlng, pickupToLatlng } from '$helpers/pickup-dropoff-to-latlng';
+import { GOOGLE_SERVICES_API } from '@env';
+import { Trip } from '$components/dumb/trip';
 
 export type MainHomeScreenProps = {
   //
 };
 
 export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
-  const tripsQuery = useGraphQLQuery(tripsDocument, {
+  const tripsQuery = useMapTripsQuery({
     tripsQueryMeta: { limit: 10, page: 1 },
   });
+
+  const [focusedTripId, setFocusedTripId] = useState<IDUnion | undefined>();
+
+  useRefreshOnFocus(tripsQuery.refetch);
 
   const trips = tripsQuery.data?.trips.items;
 
   const [mapRegion, setMapRegion] = useAtom(mapRegionAtom);
   const colorSchema = useAppColorSchema();
 
+  const onMarkerClick = useCallback((id: IDUnion) => setFocusedTripId(id), []);
+
   const tripsMarkers = useMemo(
     () =>
       trips?.map(trip => (
-        <>
+        <React.Fragment key={trip.id}>
           <Marker
-            key={trip.id}
+            onPress={() => onMarkerClick(trip.id)}
             coordinate={{
               latitude: trip.pickupLatitude,
               longitude: trip.pickupLongitude,
             }}
           >
             <TripMapMarkerCard>
-              <Text>Pickup</Text>
+              <MaterialCommunityIcon name='car' size={18} />
             </TripMapMarkerCard>
           </Marker>
           <Marker
+            onPress={() => onMarkerClick(trip.id)}
             coordinate={{
               latitude: trip.dropoffLatitude,
               longitude: trip.dropoffLongitude,
             }}
           >
             <TripMapMarkerCard>
-              <Text>Dropoff</Text>
+              <MaterialCommunityIcon name='flag-checkered' size={18} />
             </TripMapMarkerCard>
           </Marker>
-        </>
+        </React.Fragment>
       )),
-    [trips]
+    [onMarkerClick, trips]
+  );
+
+  const focusedTrip = useMemo(
+    () => trips?.find(trip => trip.id === focusedTripId),
+    [focusedTripId, trips]
+  );
+
+  const focusedTripMapViewDirections = useMemo(
+    () =>
+      focusedTrip && (
+        <MapViewDirections
+          origin={pickupToLatlng(focusedTrip)}
+          destination={dropoffToLatlng(focusedTrip)}
+          apikey={GOOGLE_SERVICES_API}
+          strokeWidth={4}
+          strokeColor='#0007'
+        />
+      ),
+    [focusedTrip]
   );
 
   return (
-    <SafeAreaView style={commonStyles.flexFull}>
+    <ScreenWrapper disablePadding>
       <MapView
         style={commonStyles.flexFull}
         initialRegion={mapRegion}
         userInterfaceStyle={colorSchema}
-        onRegionChange={setMapRegion}
+        onRegionChangeComplete={setMapRegion}
       >
         {tripsMarkers}
+        {focusedTripMapViewDirections}
       </MapView>
-    </SafeAreaView>
+      {focusedTrip && (
+        <Trip
+          style={{ position: 'absolute', top: 16, left: 16, right: 16 }}
+          source={focusedTrip.pickupAddress.addressLineOne}
+          dest={focusedTrip.dropoffAddress.addressLineOne}
+          time={new Date(focusedTrip.plannedAt)}
+          emptySeatsCount={(focusedTrip.capacity ?? 1) - (focusedTrip.occupiedSeats ?? 1)}
+          onJoin={() => {}}
+          onShowMore={() => {}}
+          onClose={() => setFocusedTripId(undefined)}
+        />
+      )}
+    </ScreenWrapper>
   );
 };

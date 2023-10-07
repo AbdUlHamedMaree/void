@@ -2,22 +2,26 @@
 
 import { AxiosRequestConfig } from 'axios';
 import { request } from './instance';
-import { resolveRequestDocument, type RequestDocument } from 'graphql-request';
+import { resolveRequestDocument, type RequestDocument, Variables } from 'graphql-request';
 import { type TypedDocumentNode } from '@graphql-typed-document-node/core';
+import { AxiosGraphQlSuccessResponse } from './response';
+import { RemoveIndex } from 'graphql-request/build/esm/helpers';
 
 export type GraphQlRequestAxiosConfig = Omit<
   AxiosRequestConfig,
   'data' | 'url' | 'method'
 >;
 
-export const graphqlRequest = <TResult extends object, TVariables = Record<string, any>>(
+export const graphqlRequest = <TResult, TVariables = Variables>(
   document: RequestDocument | TypedDocumentNode<TResult, TVariables>,
-  ...[variables, config]: TVariables extends Record<string, any>
-    ? [TVariables, GraphQlRequestAxiosConfig?]
-    : [TVariables?, GraphQlRequestAxiosConfig?]
-) =>
+  ...[variables, config]: TVariables extends Record<any, never>
+    ? [undefined?, GraphQlRequestAxiosConfig?]
+    : keyof RemoveIndex<TVariables> extends never
+    ? [undefined?, GraphQlRequestAxiosConfig?]
+    : [TVariables, GraphQlRequestAxiosConfig?]
+): Promise<TResult> =>
   request
-    .post<TResult>(
+    .post<any, AxiosGraphQlSuccessResponse<TResult>>(
       'graphql',
       {
         ...resolveRequestDocument(document),
@@ -26,7 +30,5 @@ export const graphqlRequest = <TResult extends object, TVariables = Record<strin
       config
     )
     .then(res => {
-      if ((res.data as any).errors) return Promise.reject((res.data as any).errors);
-
-      return (res.data as any).data;
+      return res.data.data;
     });
