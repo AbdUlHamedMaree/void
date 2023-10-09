@@ -1,5 +1,5 @@
 import { LoadingSection } from '$components/dumb/loading-section';
-import { Trip, TripProps } from '$components/dumb/trip';
+import { Trip } from '$components/dumb/trip';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
 import { useRefreshOnFocus } from '$libs/react-query/use-refetch-on-screen-focus';
 import { spacing } from '$theme/spacing';
@@ -10,6 +10,7 @@ import { FAB } from 'react-native-paper';
 import { useJoinTripModal } from '$hooks/use-join-trip-modal';
 import { useTripsQuery } from '$apis/trips';
 import { IDUnion } from '$models/id';
+import { TripCardModel } from '$fragments/trip-card';
 
 export type AllTripsScreenProps = {
   //
@@ -66,7 +67,11 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
         empty={trips?.length === 0}
       >
         {trips && (
-          <VirtualizedList<TripProps & { key: string; id: IDUnion }>
+          <VirtualizedList<TripCardModel & { id: number }>
+            keyExtractor={item => item.id + ''}
+            getItemCount={trips => trips.length}
+            getItem={(trips, i) => trips[i]}
+            data={trips}
             renderItem={item => {
               const { id, ...props } = item.item;
               return (
@@ -77,23 +82,6 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
                   onShowMore={() => handleShowMore(id)}
                 />
               );
-            }}
-            keyExtractor={item => item.key}
-            getItemCount={() => trips.length}
-            getItem={(_, i) => {
-              const trip = trips[i];
-
-              const emptySeatsCount = (trip.capacity ?? 1) - (trip.occupiedSeats ?? 1);
-
-              return {
-                id: trip.id,
-                key: trip.id + '',
-                source: trip.pickupAddress.addressLineOne ?? undefined,
-                dest: trip.dropoffAddress.addressLineOne ?? undefined,
-                time: new Date(trip.plannedAt),
-                emptySeatsCount: emptySeatsCount,
-                disableJoinButton: emptySeatsCount === 0,
-              };
             }}
           />
         )}

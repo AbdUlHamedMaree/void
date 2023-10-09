@@ -100,10 +100,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
       {focusedTrip && (
         <Trip
           style={{ position: 'absolute', top: 16, left: 16, right: 16 }}
-          source={focusedTrip.pickupAddress.addressLineOne}
-          dest={focusedTrip.dropoffAddress.addressLineOne}
-          time={new Date(focusedTrip.plannedAt)}
-          emptySeatsCount={(focusedTrip.capacity ?? 1) - (focusedTrip.occupiedSeats ?? 1)}
+          {...focusedTrip}
           onJoin={() => {}}
           onShowMore={() => {}}
           onClose={() => setFocusedTripId(undefined)}

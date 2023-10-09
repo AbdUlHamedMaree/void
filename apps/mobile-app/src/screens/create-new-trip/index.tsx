@@ -1,7 +1,7 @@
 import { commonStyles } from '$styles/common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Button, SegmentedButtons, Text } from 'react-native-paper';
+import { Button, SegmentedButtons } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
 import { DateTimeField } from '$components/fields/date-time';
 import { TextField } from '$components/fields/text';
@@ -23,6 +23,7 @@ import { ScreenWrapper } from '$components/smart/screen-wrapper';
 import { useAppTheme } from '$theme/hook';
 import { useCreateTripMutation } from '$apis/trips';
 import { toast } from '$modules/react-native-paper-toast';
+import { MaterialCommunityIcon } from '$components/icons';
 
 const addressValidation = object({
   addressLineOne: string(),
@@ -170,14 +171,14 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
         {pickupLocation && (
           <Marker coordinate={pickupLocation}>
             <TripMapMarkerCard>
-              <Text>Pickup</Text>
+              <MaterialCommunityIcon name='car' size={18} />
             </TripMapMarkerCard>
           </Marker>
         )}
         {dropoffLocation && (
           <Marker coordinate={dropoffLocation}>
             <TripMapMarkerCard>
-              <Text>Drop off</Text>
+              <MaterialCommunityIcon name='flag-checkered' size={18} />
             </TripMapMarkerCard>
           </Marker>
         )}

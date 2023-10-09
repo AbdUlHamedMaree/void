@@ -16,5 +16,6 @@ export const getNewTokensRequest = () => {
 
   return graphqlRequest(getNewTokensDocument, undefined, {
     headers: { Authorization: `Bearer ${refreshToken}` },
+    __refreshTokenRequest: true,
   });
 };

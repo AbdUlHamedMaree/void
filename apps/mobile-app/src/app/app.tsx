@@ -32,9 +32,7 @@ const Application: React.FC = () => {
           <Suspense fallback={<SplashScreen />}>
             <PaperToastContainer variant='contained' />
 
-            <QueryClientProvider client={queryClient}>
-              <RootStack />
-            </QueryClientProvider>
+            <RootStack />
           </Suspense>
         </AppNavigationContainer>
       </AppPaperProvider>
@@ -48,7 +46,9 @@ export const App: React.FC = () => {
   return (
     <Suspense fallback={<WeakSplashScreen />}>
       <GestureHandlerRootView style={commonStyles.flexFull}>
-        <Application />
+        <QueryClientProvider client={queryClient}>
+          <Application />
+        </QueryClientProvider>
       </GestureHandlerRootView>
     </Suspense>
   );

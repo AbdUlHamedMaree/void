@@ -5,11 +5,6 @@ export const verifyOTPDocument = graphql(`
     verifyOtp(payload: $verifyOTPPayload) {
       accessToken
       refreshToken
-      user {
-        id
-        email
-        phone
-      }
     }
   }
 `);

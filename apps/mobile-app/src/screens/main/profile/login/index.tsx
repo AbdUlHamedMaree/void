@@ -8,8 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { View } from 'react-native';
 import { Button, Divider, IconButton, Text, TextInput } from 'react-native-paper';
 import { object, string } from 'zod';
-import { useSetAtom } from 'jotai';
-import { userAtom } from '$atoms/user';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { PaperButton } from '$components/dumb/paper-button';
 import { storage } from '$libs/mmkv';
@@ -35,7 +33,6 @@ export type MainProfileLoginScreenProps = {
 
 export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () => {
   const loginMutation = useLoginMutation();
-  const setUser = useSetAtom(userAtom);
 
   storage.accessToken.get();
 
@@ -53,21 +50,16 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
 
   const handleSubmit = methods.handleSubmit(async values => {
     try {
-      const phoneWithCountryCode = '971' + values.phone;
+      const phoneWithCountryCode = '+971' + values.phone;
 
       const {
-        login: { accessToken, refreshToken, user },
+        login: { accessToken, refreshToken },
       } = await loginMutation.mutateAsync({
         loginPayload: { username: phoneWithCountryCode, password: values.password },
       });
 
       storage.accessToken.set(accessToken);
       storage.refreshToken.set(refreshToken);
-
-      setUser({
-        phone: user.phone ?? undefined,
-        id: user.id + '' ?? Date.now() + '',
-      });
 
       navigate('Main', { screen: 'Profile', params: { screen: 'Account' } });
     } catch (err) {

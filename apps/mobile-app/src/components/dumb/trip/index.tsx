@@ -6,13 +6,9 @@ import { StyleSheet } from 'react-native';
 import { Button, Card, CardProps, Divider, IconButton, Text } from 'react-native-paper';
 import { format } from 'date-fns';
 import { useAppTheme } from '$theme/hook';
+import { TripCardModel } from '$fragments/trip-card';
 
-export type TripProps = {
-  source?: string | null;
-  dest?: string | null;
-  time?: Date | null;
-  emptySeatsCount?: number | null;
-
+export type TripProps = TripCardModel & {
   disableJoinButton?: boolean | null;
 
   onJoin?: () => void;
@@ -21,27 +17,35 @@ export type TripProps = {
 } & Omit<CardProps, 'children' | 'mode' | 'elevation' | 'id'>;
 
 export const Trip = memo<TripProps>(function Trip({
-  source,
-  dest,
-  time,
-  emptySeatsCount,
+  capacity,
+  occupiedSeats,
+  plannedAt,
+  pickupAddress,
+  dropoffAddress,
+
   disableJoinButton,
   onJoin,
   onShowMore,
   onClose,
   ...props
 }) {
-  const formatedTime = useMemo(
+  const time = useMemo(() => new Date(plannedAt), [plannedAt]);
+
+  const formattedTime = useMemo(
     () => (time ? format(time, 'Pp') : 'Unknown Time'),
     [time]
   );
+
+  const emptySeatsCount = (capacity ?? 1) - (occupiedSeats ?? 1);
 
   const theme = useAppTheme();
 
   return (
     <Card {...props}>
       <Card.Content style={styles.cardContent}>
-        <Text variant='titleMedium'>{source ?? 'Unknown Source'}</Text>
+        <Text variant='titleMedium'>
+          {pickupAddress.addressLineOne ?? 'Unknown Source'}
+        </Text>
 
         <MaterialCommunityIcon
           name='arrow-down'
@@ -50,7 +54,9 @@ export const Trip = memo<TripProps>(function Trip({
           style={commonStyles.textCenter}
         />
 
-        <Text variant='titleMedium'>{dest ?? 'Unknown Destination'}</Text>
+        <Text variant='titleMedium'>
+          {dropoffAddress.addressLineOne ?? 'Unknown Destination'}
+        </Text>
 
         {onClose && (
           <IconButton
@@ -63,12 +69,12 @@ export const Trip = memo<TripProps>(function Trip({
 
         <Divider />
 
-        <Text variant='titleMedium'>{formatedTime}</Text>
+        <Text variant='titleMedium'>{formattedTime}</Text>
 
         <Text variant='titleMedium'>{emptySeatsCount} Seats left</Text>
       </Card.Content>
       <Card.Actions>
-        <Button onPress={onJoin} disabled={!!disableJoinButton}>
+        <Button onPress={onJoin} disabled={!!disableJoinButton || emptySeatsCount === 0}>
           Join
         </Button>
         <Button onPress={onShowMore}>Show More</Button>

@@ -1,8 +1,9 @@
 import { createGraphQLCRUDEntity } from '$libs/graphql-react-query/create-graphql-crud-entity';
 import { loginDocument } from './mutations/login';
 import { signUpDocument } from './mutations/sign-up';
+import { meDocument } from './queries/me';
 
 export const {
-  queries: _,
+  queries: [useMeQuery],
   mutations: [useLoginMutation, useSignUpMutation],
-} = createGraphQLCRUDEntity()(loginDocument, signUpDocument);
+} = createGraphQLCRUDEntity(meDocument)(loginDocument, signUpDocument);

@@ -7,56 +7,16 @@ export const mapTripsDocument = graphql(`
         id
         capacity
         occupiedSeats
-        status
-        seatsStatus
-        type
-        createdById
         plannedAt
-
-        timeline {
-          id
-          latitude
-          longitude
-          occupiedSeats
-          status
-        }
-
-        passengers {
-          id
-          email
-          phone
-        }
-
-        reservations {
-          userId
-          poolerType
-          requestedSeatsCount
-        }
-
-        driver {
-          id
-          email
-          phone
-        }
 
         pickupAddress {
           addressLineOne
-          addressLineTwo
-          area
-          city
-          country
-          postCode
         }
         pickupLatitude
         pickupLongitude
 
         dropoffAddress {
           addressLineOne
-          addressLineTwo
-          area
-          city
-          country
-          postCode
         }
         dropoffLatitude
         dropoffLongitude

@@ -1,4 +1,3 @@
-import { userAtom } from '$atoms/user';
 import { PaperButton } from '$components/dumb/paper-button';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
@@ -9,12 +8,12 @@ import { useAppTheme } from '$theme/hook';
 import { spacing } from '$theme/spacing';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useSetAtom } from 'jotai';
 import { FormProvider, useForm } from 'react-hook-form';
 import { View } from 'react-native';
 import { Button, Divider, IconButton, Text } from 'react-native-paper';
 import { object, string } from 'zod';
 import { useVerifyOTPMutation } from '$apis/otp';
+import { useQueryClient } from '@tanstack/react-query';
 
 const validationSchema = object({
   otp: string({ required_error: 'Code is required field' }).length(
@@ -29,7 +28,7 @@ export type MainProfileOTPScreenProps = {
 
 export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
   const { navigate } = useNavigation();
-  const setUser = useSetAtom(userAtom);
+  const queryClient = useQueryClient();
 
   const verifyOTPMutation = useVerifyOTPMutation();
 
@@ -49,7 +48,7 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
   const handleSubmit = methods.handleSubmit(async value => {
     try {
       const {
-        verifyOtp: { accessToken, refreshToken, user },
+        verifyOtp: { accessToken, refreshToken },
         // TODO: user values.otp later
       } = await verifyOTPMutation.mutateAsync({
         verifyOTPPayload: { otp, phoneNumber: phone },
@@ -58,7 +57,8 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
       storage.accessToken.set(accessToken);
       storage.refreshToken.set(refreshToken);
 
-      setUser({ id: user.id + '', phone: user.phone ?? undefined });
+      queryClient.invalidateQueries(['MeQuery']);
+
       navigate('Main', {
         screen: 'Profile',
         params: {

@@ -5,18 +5,16 @@ import { AxiosGraphQlErrorResponseData, isGraphQlStandardError } from './error';
 import { AxiosError } from 'axios';
 import { getNewTokensRequest } from './get-new-tokens';
 import { storage } from '$libs/mmkv';
-import { useSetAtom } from 'jotai';
-import { userAtom } from '$atoms/user';
+import { useMeQuery } from '$apis/user';
 
 export const useAxiosService = () => {
-  const setUser = useSetAtom(userAtom);
+  useMeQuery();
 
   const errorInterceptor = useCallback(
     async (error: AxiosError<AxiosGraphQlErrorResponseData>) => {
       if (error?.code === '401') {
         const originalRequest = error.config!;
-        if (!(originalRequest as any)._retry) {
-          (originalRequest as any)._retry = true;
+        if (!originalRequest.__refreshTokenRequest) {
           const newTokens = await getNewTokensRequest();
 
           storage.accessToken.set(newTokens.getNewTokens.accessToken);
@@ -27,12 +25,11 @@ export const useAxiosService = () => {
 
         storage.accessToken.delete();
         storage.refreshToken.delete();
-        setUser(null);
       }
 
       return Promise.reject(error);
     },
-    [setUser]
+    []
   );
 
   useLayoutEffect(() => {
@@ -67,7 +64,7 @@ export const useAxiosService = () => {
 
         return response;
       },
-      async err => Promise.reject(err)
+      async err => errorInterceptor(err)
     );
 
     return () => {

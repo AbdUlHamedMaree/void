@@ -50,7 +50,7 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
   });
 
   const handleSubmit = methods.handleSubmit(async values => {
-    const phoneWithCountryCode = '971' + values.phone;
+    const phoneWithCountryCode = '+971' + values.phone;
 
     try {
       await signUpMutation.mutateAsync({
