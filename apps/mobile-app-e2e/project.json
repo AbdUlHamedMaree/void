@@ -53,19 +53,13 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/mobile-app-e2e/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/mobile-app-e2e/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "mobile-app"
-  ]
+  "implicitDependencies": ["mobile-app"]
 }

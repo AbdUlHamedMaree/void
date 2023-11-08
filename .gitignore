@@ -331,3 +331,4 @@ TODO
 
 **/.env*.local
 graphql.schema.json
+.nx/cache
