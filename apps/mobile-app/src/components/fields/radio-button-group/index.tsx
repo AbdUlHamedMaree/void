@@ -1,48 +1,34 @@
+import { FieldComponentProps, createField } from '$tools/create-field';
 import { mergeFunctions } from '$tools/merge-functions';
 import React, { memo } from 'react';
-import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
-import { View } from 'react-native';
+import { View, ViewProps } from 'react-native';
 import { HelperText, RadioButton } from 'react-native-paper';
 
 export type RadioButtonGroupFieldProps = {
   children?: React.ReactNode;
-} & Omit<ControllerProps, 'render' | 'control'>;
+  viewContainerProps?: ViewProps;
+};
 
-export const RadioButtonGroupField = memo<RadioButtonGroupFieldProps>(
-  function RadioButtonGroupField({
-    name,
-    defaultValue,
-    disabled,
-    rules,
-    shouldUnregister,
+export const RadioButtonGroupField = createField<RadioButtonGroupFieldProps>(
+  memo<FieldComponentProps<RadioButtonGroupFieldProps>>(function RadioButtonGroupField({
+    form: {
+      field: { onChange, onBlur, value },
+      fieldState: { error },
+    },
     children,
+    viewContainerProps,
   }) {
-    const { control } = useFormContext();
-
     return (
-      <Controller
-        name={name}
-        defaultValue={defaultValue}
-        disabled={disabled}
-        rules={rules}
-        shouldUnregister={shouldUnregister}
-        control={control}
-        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-          <View>
-            <RadioButton.Group
-              onValueChange={mergeFunctions(onChange, onBlur)}
-              value={value}
-            >
-              {children}
-            </RadioButton.Group>
-            {error && (
-              <HelperText type='error' visible>
-                {error.message}
-              </HelperText>
-            )}
-          </View>
+      <View {...viewContainerProps}>
+        <RadioButton.Group onValueChange={mergeFunctions(onChange, onBlur)} value={value}>
+          {children}
+        </RadioButton.Group>
+        {error && (
+          <HelperText type='error' visible>
+            {error.message}
+          </HelperText>
         )}
-      />
+      </View>
     );
-  }
+  })
 );

@@ -1,6 +1,6 @@
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { UseGraphQLQueryReturn, useGraphQLQuery } from './use-graphql-query';
-import { UseQueryOptions } from '@tanstack/react-query';
+import { DefaultError, UseQueryOptions } from '@tanstack/react-query';
 import { GraphQlRequestAxiosConfig } from '$libs/axios/graphql';
 import { RemoveIndex } from 'graphql-request/build/esm/helpers';
 
@@ -9,7 +9,7 @@ export type CreateGraphQlQueryReturn<
   TVariables,
   TKey extends unknown[] = [string, TVariables],
   THookOptions = Omit<
-    UseQueryOptions<TData, unknown, TData, TKey>,
+    UseQueryOptions<TData, DefaultError, TData, TKey>,
     'queryKey' | 'queryFn' | 'initialData'
   > & { initialData?: () => undefined },
 > = (

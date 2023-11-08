@@ -5,8 +5,10 @@ export const meDocument = graphql(`
     me {
       id
       email
+      name
       phone
       role
+      status
     }
   }
 `);

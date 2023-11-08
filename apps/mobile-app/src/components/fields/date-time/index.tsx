@@ -3,12 +3,19 @@ import {
   MaskedTextInputProps,
 } from '$components/dumb/masked-text-input';
 import { useAppTheme } from '$theme/hook';
+import { FieldComponentProps, createField } from '$tools/create-field';
 import { mergeFunctions } from '$tools/merge-functions';
 import { format, parse } from 'date-fns';
-import React, { forwardRef, memo, useState } from 'react';
-import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { mergeRefs } from 'react-merge-refs';
-import { View } from 'react-native';
+import { View, ViewProps } from 'react-native';
 import { HelperText, TextInput } from 'react-native-paper';
 import {
   DatePickerModal,
@@ -23,9 +30,9 @@ registerTranslation('en', en);
 export const dateTimeRegex =
   /[0-3]?[0-9]\/[01]?[0-9]\/[12]?[09]?[0-9][0-9] [01]?[0-6]:[0-6][0-9] [aApP][mM]/;
 
-export const dateTimeFormate = 'LL/dd/yyyy hh:mm aa';
+export const dateTimeFormat = 'dd/LL/yyyy hh:mm aa';
 
-export const fallbackDateTimeString = '01/01/2020 12:00 PM';
+export const fallbackDateTimeString = format(Date.now(), dateTimeFormat);
 
 export const dateTimeMask = '99/99/9999 99:99 AA';
 
@@ -34,28 +41,50 @@ export const dateTimeFormatHelperText = 'DD/MM/YYYY HH:MM XP';
 const completeDateStringWithDefault = (value: string) =>
   value + fallbackDateTimeString.substring(value.length, fallbackDateTimeString.length);
 
+const tryParseDateString = (dateString: string) => {
+  const fullDateString = completeDateStringWithDefault(dateString);
+
+  try {
+    const date = parse(fullDateString, dateTimeFormat, 0);
+
+    if (!isNaN(date.getDay())) return date;
+  } catch (err) {
+    //
+  }
+
+  try {
+    const date = new Date(dateString);
+
+    if (!isNaN(date.getDay())) return date;
+  } catch (err) {
+    //
+  }
+};
+
 export type DateTimeFieldProps = {
   datePickerProps?: Partial<DatePickerModalSingleProps>;
   timePickerProps?: Partial<React.ComponentProps<typeof TimePickerModal>>;
-} & Omit<ControllerProps, 'render' | 'control'> &
-  MaskedTextInputProps;
+  viewContainerProps?: ViewProps;
+} & MaskedTextInputProps;
 
-export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
-  forwardRef<React.ComponentRef<typeof MaskedTextInput>, DateTimeFieldProps>(
-    function DateTimeField(
+export const DateTimeField = createField<DateTimeFieldProps>(
+  memo(
+    forwardRef<
+      React.ComponentRef<typeof MaskedTextInput>,
+      FieldComponentProps<DateTimeFieldProps>
+    >(function DateTimeField(
       {
-        name,
-        defaultValue,
-        disabled,
-        rules,
-        shouldUnregister,
+        form: {
+          field: { ref, onChange, onBlur, value, disabled },
+          fieldState: { error },
+        },
         datePickerProps,
         timePickerProps,
+        viewContainerProps,
         ...props
       },
       forwardedRef
     ) {
-      const { control } = useFormContext();
       const theme = useAppTheme();
 
       const [fieldValue, setFieldValue] = useState('');
@@ -63,129 +92,124 @@ export const DateTimeField: React.FC<DateTimeFieldProps> = memo(
       const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
       const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
 
-      const openDatePicker = () => setIsDatePickerOpen(true);
-      const closeDatePicker = () => setIsDatePickerOpen(false);
+      const openDatePicker = useCallback(() => setIsDatePickerOpen(true), []);
+      const closeDatePicker = useCallback(() => setIsDatePickerOpen(false), []);
 
-      const openTimePicker = () => setIsTimePickerOpen(true);
-      const closeTimePicker = () => setIsTimePickerOpen(false);
+      const openTimePicker = useCallback(() => setIsTimePickerOpen(true), []);
+      const closeTimePicker = useCallback(() => setIsTimePickerOpen(false), []);
+
+      const color = error ? theme.colors.error : undefined;
+
+      const dateValue = useMemo(() => {
+        if (typeof value === 'string') {
+          return tryParseDateString(value);
+        }
+        return value;
+      }, [value]);
+
+      useEffect(() => {
+        if (dateValue) setFieldValue(format(dateValue, dateTimeFormat));
+      }, [dateValue]);
+
+      const finalHours = useMemo(() => dateValue?.getHours(), [dateValue]);
+      const finalMinutes = useMemo(() => dateValue?.getMinutes(), [dateValue]);
 
       return (
-        <Controller
-          name={name}
-          defaultValue={defaultValue}
-          disabled={disabled}
-          rules={rules}
-          shouldUnregister={shouldUnregister}
-          control={control}
-          render={({
-            field: { ref, onChange, onBlur, value, disabled },
-            fieldState: { error },
-          }) => {
-            const color = error ? theme.colors.error : undefined;
+        <>
+          <DatePickerModal
+            locale='en'
+            mode='single'
+            visible={isDatePickerOpen}
+            date={dateValue}
+            {...datePickerProps}
+            onDismiss={mergeFunctions(
+              onBlur,
+              datePickerProps?.onDismiss,
+              closeDatePicker
+            )}
+            onConfirm={mergeFunctions(
+              ({ date }) => {
+                typeof finalHours === 'number' && date?.setHours(finalHours);
 
-            const finalHours = value?.getHours();
-            const finalMinutes = value?.getMinutes();
+                typeof finalMinutes === 'number' && date?.setMinutes(finalMinutes);
 
-            return (
-              <>
-                <DatePickerModal
-                  locale='en'
-                  mode='single'
-                  visible={isDatePickerOpen}
-                  date={value}
-                  {...datePickerProps}
-                  onDismiss={mergeFunctions(
-                    onBlur,
-                    datePickerProps?.onDismiss,
-                    closeDatePicker
-                  )}
-                  onConfirm={mergeFunctions(
-                    ({ date }) => {
-                      typeof finalHours === 'number' && date?.setHours(finalHours);
+                onChange(date);
+                setFieldValue(format(date, dateTimeFormat));
+              },
+              datePickerProps?.onConfirm,
+              closeDatePicker,
+              openTimePicker
+            )}
+          />
+          <TimePickerModal
+            locale='en'
+            hours={finalHours}
+            minutes={finalMinutes}
+            visible={isTimePickerOpen}
+            {...timePickerProps}
+            onDismiss={mergeFunctions(
+              onBlur,
+              closeTimePicker,
+              timePickerProps?.onDismiss
+            )}
+            onConfirm={mergeFunctions(
+              ({ hours, minutes }) => {
+                const date = dateValue ? new Date(dateValue) : new Date();
 
-                      typeof finalMinutes === 'number' && date?.setMinutes(finalMinutes);
+                date.setHours(hours);
+                date.setMinutes(minutes);
 
-                      onChange(date);
-                      setFieldValue(format(date, dateTimeFormate));
-                    },
-                    datePickerProps?.onConfirm,
-                    closeDatePicker,
-                    openTimePicker
-                  )}
+                onChange(date);
+                setFieldValue(format(date, dateTimeFormat));
+              },
+              onBlur,
+              closeTimePicker,
+              timePickerProps?.onConfirm
+            )}
+          />
+          <View {...viewContainerProps}>
+            <MaskedTextInput
+              value={fieldValue}
+              disabled={disabled}
+              mode='outlined'
+              mask={dateTimeMask}
+              outlineColor={color}
+              textColor={color}
+              cursorColor={color}
+              underlineColor={color}
+              activeOutlineColor={color}
+              activeUnderlineColor={color}
+              placeholderTextColor={color}
+              {...props}
+              onChangeText={mergeFunctions(setFieldValue, props.onChangeText)}
+              onBlur={mergeFunctions(() => {
+                if (!fieldValue) return;
+
+                const fullText = completeDateStringWithDefault(fieldValue);
+                const date = parse(fullText, dateTimeFormat, 0);
+
+                if (isNaN(date.getDay())) return;
+
+                setFieldValue(fullText);
+                onChange(date);
+              }, props.onBlur)}
+              ref={mergeRefs([ref, forwardedRef])}
+              right={
+                <TextInput.Icon
+                  icon='calendar'
+                  size={20}
+                  disabled={disabled}
+                  onPress={openDatePicker}
                 />
-                <TimePickerModal
-                  locale='en'
-                  hours={finalHours}
-                  minutes={finalMinutes}
-                  visible={isTimePickerOpen}
-                  {...timePickerProps}
-                  onDismiss={mergeFunctions(
-                    onBlur,
-                    closeTimePicker,
-                    timePickerProps?.onDismiss
-                  )}
-                  onConfirm={mergeFunctions(
-                    ({ hours, minutes }) => {
-                      const date = value ? new Date(value) : new Date();
+              }
+            />
 
-                      date.setHours(hours);
-                      date.setMinutes(minutes);
-
-                      onChange(date);
-                      setFieldValue(format(date, dateTimeFormate));
-                    },
-                    onBlur,
-                    closeTimePicker,
-                    timePickerProps?.onConfirm
-                  )}
-                />
-                <View>
-                  <MaskedTextInput
-                    value={fieldValue}
-                    disabled={disabled}
-                    mode='outlined'
-                    mask={dateTimeMask}
-                    outlineColor={color}
-                    textColor={color}
-                    cursorColor={color}
-                    underlineColor={color}
-                    activeOutlineColor={color}
-                    activeUnderlineColor={color}
-                    placeholderTextColor={color}
-                    {...props}
-                    onChangeText={mergeFunctions(
-                      text => {
-                        const fullText = completeDateStringWithDefault(text);
-
-                        const date = parse(fullText, dateTimeFormate, 0);
-
-                        if (isNaN(date.getDay())) return;
-
-                        onChange(date);
-                      },
-                      setFieldValue,
-                      props.onChangeText
-                    )}
-                    ref={mergeRefs([ref, forwardedRef])}
-                    right={
-                      <TextInput.Icon
-                        icon='calendar'
-                        size={20}
-                        disabled={disabled}
-                        onPress={openDatePicker}
-                      />
-                    }
-                  />
-
-                  <HelperText type={error ? 'error' : 'info'} visible>
-                    {error ? error.message : dateTimeFormatHelperText}
-                  </HelperText>
-                </View>
-              </>
-            );
-          }}
-        />
+            <HelperText type={error ? 'error' : 'info'} visible>
+              {error ? error.message : dateTimeFormatHelperText}
+            </HelperText>
+          </View>
+        </>
       );
-    }
+    })
   )
 );

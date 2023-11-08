@@ -63,6 +63,9 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
         screen: 'Profile',
         params: {
           screen: 'Account',
+          params: {
+            screen: 'Main',
+          },
         },
       });
     } catch (err) {

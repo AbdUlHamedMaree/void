@@ -10,15 +10,54 @@ import { FAB } from 'react-native-paper';
 import { useJoinTripModal } from '$hooks/use-join-trip-modal';
 import { useTripsQuery } from '$apis/trips';
 import { IDUnion } from '$models/id';
-import { TripCardModel } from '$fragments/trip-card';
+import { useAtomValue } from 'jotai';
+import { tripsFiltersAtom } from '$atoms/trips-filters';
+import { GetTripsFiltersIt, InputMaybe } from '$gql/graphql';
+import { useCheckIsUserInTrip } from '$hooks/use-check-is-user-in-trip';
 
 export type AllTripsScreenProps = {
   //
 };
 
 export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
+  const tripsFilters = useAtomValue(tripsFiltersAtom);
+
+  const tripsQueryFilters = useMemo<InputMaybe<GetTripsFiltersIt>>(
+    () => ({
+      pickupCountries: tripsFilters?.pickup?.country
+        ? [tripsFilters?.pickup?.country]
+        : undefined,
+      pickupCities: tripsFilters?.pickup?.city ? [tripsFilters?.pickup?.city] : undefined,
+      pickupAreas: tripsFilters?.pickup?.area ? [tripsFilters?.pickup?.area] : undefined,
+      dropoffCountries: tripsFilters?.dropoff?.country
+        ? [tripsFilters?.dropoff?.country]
+        : undefined,
+      dropoffCities: tripsFilters?.dropoff?.city
+        ? [tripsFilters?.dropoff?.city]
+        : undefined,
+      dropoffAreas: tripsFilters?.dropoff?.area
+        ? [tripsFilters?.dropoff?.area]
+        : undefined,
+
+      availableSeats: tripsFilters?.minAvailableSeats,
+      plannedAtFrom: tripsFilters?.fromAt?.toISOString(),
+      plannedAtTo: tripsFilters?.toAt?.toISOString(),
+    }),
+    [
+      tripsFilters?.dropoff?.area,
+      tripsFilters?.dropoff?.city,
+      tripsFilters?.dropoff?.country,
+      tripsFilters?.fromAt,
+      tripsFilters?.minAvailableSeats,
+      tripsFilters?.pickup?.area,
+      tripsFilters?.pickup?.city,
+      tripsFilters?.pickup?.country,
+      tripsFilters?.toAt,
+    ]
+  );
+
   const tripsQuery = useTripsQuery({
-    tripsQueryMeta: { limit: 10, page: 1 },
+    tripsQueryFilters: tripsQueryFilters,
   });
   useRefreshOnFocus(tripsQuery.refetch);
 
@@ -33,6 +72,8 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
     [selectedTripId, trips]
   );
 
+  const checkIsUserInTrip = useCheckIsUserInTrip();
+
   const handleJoinTripModalCancel = useCallback(() => {
     setSelectedTripId(null);
   }, []);
@@ -45,12 +86,16 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
     onJoin: handleJoinTripModalJoin,
   });
 
-  const handleCardJoin = useCallback((id: IDUnion) => {
-    setSelectedTripId(id);
-  }, []);
+  const handleCardJoin = useCallback(
+    (id: number) => {
+      setSelectedTripId(id);
+      joinTripModal.open();
+    },
+    [joinTripModal]
+  );
 
   const handleShowMore = useCallback(
-    (id: IDUnion) => {
+    (id: number) => {
       navigate('Main', {
         screen: 'Trips',
         params: { screen: 'Single', params: { id } },
@@ -62,22 +107,28 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
   return (
     <ScreenWrapper disablePadding>
       <LoadingSection
-        loading={tripsQuery.status === 'loading'}
-        error={tripsQuery.status === 'error'}
+        loading={tripsQuery.isLoading}
+        error={tripsQuery.isError}
         empty={trips?.length === 0}
       >
         {trips && (
-          <VirtualizedList<TripCardModel & { id: number }>
+          <VirtualizedList<(typeof trips)[number] & { id: number }>
             keyExtractor={item => item.id + ''}
             getItemCount={trips => trips.length}
             getItem={(trips, i) => trips[i]}
             data={trips}
             renderItem={item => {
               const { id, ...props } = item.item;
+
               return (
                 <Trip
+                  key={id}
                   {...props}
-                  style={{ marginHorizontal: spacing.lg, marginVertical: spacing.md }}
+                  style={{
+                    marginHorizontal: spacing.lg,
+                    marginTop: spacing.lg,
+                  }}
+                  joined={checkIsUserInTrip(props)}
                   onJoin={() => handleCardJoin(id)}
                   onShowMore={() => handleShowMore(id)}
                 />
@@ -86,6 +137,7 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
           />
         )}
       </LoadingSection>
+      <LoadingSection loading />
       <FAB
         icon='plus'
         style={{
@@ -96,7 +148,7 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
         }}
         onPress={() => navigate('CreateNewTrip')}
       />
-      {joinTripModal}
+      {joinTripModal.modal}
     </ScreenWrapper>
   );
 };

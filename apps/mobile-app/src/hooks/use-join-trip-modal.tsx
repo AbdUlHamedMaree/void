@@ -1,10 +1,9 @@
-
 import { useJoinTripMutation } from '$apis/trips';
 import { JoinTripFormFields, JoinTripModal } from '$components/smart/join-trip-modal';
 import { TripOt } from '$gql/graphql';
 import { toast } from '$modules/react-native-paper-toast';
 import { isAxiosError } from 'axios';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 export type UseJoinTripModalArg = {
   trip?: Pick<TripOt, 'id' | 'capacity' | 'occupiedSeats'>;
@@ -15,6 +14,11 @@ export type UseJoinTripModalArg = {
 
 export const useJoinTripModal = ({ trip, onJoin, onCancel }: UseJoinTripModalArg) => {
   const joinTripMutation = useJoinTripMutation();
+
+  const [visible, setVisible] = useState(false);
+
+  const open = useCallback(() => setVisible(true), []);
+  const close = useCallback(() => setVisible(false), []);
 
   const availableSeatsCount = useMemo(
     () => (trip?.capacity ?? 1) - (trip?.occupiedSeats ?? 0),
@@ -37,6 +41,7 @@ export const useJoinTripModal = ({ trip, onJoin, onCancel }: UseJoinTripModalArg
         await onJoin?.(values);
 
         toast.success('Trip joined successfully!');
+        close();
       } catch (err) {
         console.error(err);
         if (isAxiosError(err)) {
@@ -44,20 +49,29 @@ export const useJoinTripModal = ({ trip, onJoin, onCancel }: UseJoinTripModalArg
         }
       }
     },
-    [joinTripMutation, onJoin, trip]
+    [close, joinTripMutation, onJoin, trip]
   );
+
+  const handleCancel = useCallback(async () => {
+    await onCancel?.();
+    close();
+  }, [close, onCancel]);
 
   const modalJsx = useMemo(
     () => (
       <JoinTripModal
         availableSeatsCount={availableSeatsCount}
-        visible={!!trip}
+        visible={visible}
         onJoin={handleJoin}
-        onCancel={onCancel}
+        onCancel={handleCancel}
       />
     ),
-    [availableSeatsCount, handleJoin, onCancel, trip]
+    [availableSeatsCount, handleCancel, handleJoin, visible]
   );
 
-  return modalJsx;
+  return {
+    modal: modalJsx,
+    open,
+    close,
+  };
 };

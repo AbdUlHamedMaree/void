@@ -18,3 +18,17 @@ export const TripCardFragment = graphql(`
 `);
 
 export type TripCardModel = FragmentModel<typeof TripCardFragment>;
+
+export const toTripCard = (obj: TripCardModel): TripCardModel => ({
+  capacity: obj.capacity,
+  occupiedSeats: obj.occupiedSeats,
+  plannedAt: obj.plannedAt,
+
+  pickupAddress: {
+    addressLineOne: obj.pickupAddress.addressLineOne,
+  },
+
+  dropoffAddress: {
+    addressLineOne: obj.dropoffAddress.addressLineOne,
+  },
+});

@@ -18,14 +18,7 @@ export const RootStack: React.FC = () => {
     >
       <RootStackNavigator.Screen name='WelcomeStepper' component={WelcomeStepperScreen} />
       <RootStackNavigator.Screen name='Main' component={MainTabsNavigation} />
-      <RootStackNavigator.Screen
-        name='CreateNewTrip'
-        component={CreateNewTripScreen}
-        options={{
-          headerShown: true,
-          title: 'Create New Trip',
-        }}
-      />
+      <RootStackNavigator.Screen name='CreateNewTrip' component={CreateNewTripScreen} />
     </RootStackNavigator.Navigator>
   );
 };

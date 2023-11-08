@@ -1,5 +1,6 @@
 import { CheckboxItemField } from '$components/fields/checkbox-item';
 import { TextField } from '$components/fields/text';
+import { useAppTheme } from '$theme/hook';
 import { spacing } from '$theme/spacing';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo } from 'react';
@@ -28,6 +29,8 @@ export const JoinTripModal: React.FC<JoinTripModalProps> = ({
   onJoin,
   onCancel,
 }) => {
+  const theme = useAppTheme();
+
   const validationSchema = useMemo(() => {
     return object({
       count: coerce
@@ -48,6 +51,7 @@ export const JoinTripModal: React.FC<JoinTripModalProps> = ({
 
   const handleSubmit = methods.handleSubmit(async values => {
     await onJoin?.(values);
+    methods.reset();
   });
 
   return (
@@ -60,18 +64,21 @@ export const JoinTripModal: React.FC<JoinTripModalProps> = ({
             <TextField
               name='count'
               label='Seats Count'
-              style={{ backgroundColor: 'transparent' }}
+              mode='outlined'
+              style={{ backgroundColor: theme.colors.elevation.level3 }}
             />
-            <View style={{ marginVertical: spacing.md }} />
+            <View style={{ marginVertical: spacing.sm }} />
             <CheckboxItemField name='isDriver' label='Joining as driver?' />
           </FormProvider>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={onCancel}>Cancel</Button>
+          <Button onPress={onCancel} loading={methods.formState.isSubmitting}>
+            Cancel
+          </Button>
           <Button
             onPress={handleSubmit}
-            loading={methods.formState.isLoading}
-            disabled={methods.formState.isLoading}
+            loading={methods.formState.isSubmitting}
+            disabled={methods.formState.isSubmitting}
           >
             Join
           </Button>

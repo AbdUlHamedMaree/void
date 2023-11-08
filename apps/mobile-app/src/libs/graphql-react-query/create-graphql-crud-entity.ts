@@ -29,7 +29,8 @@ export const createGraphQLCRUDEntity =
 
     const mutationHooks = mutationsDocuments.map(document =>
       createGraphQlMutation(document, {
-        onSettled: () => queriesKeys.map(key => queryClient.invalidateQueries([key])),
+        onSuccess: () =>
+          queriesKeys.map(key => queryClient.invalidateQueries({ queryKey: [key] })),
       })
     );
 

@@ -1,17 +1,22 @@
 import { commonStyles } from '$styles/common';
-import { Image, View } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 import { Text } from 'react-native-paper';
+import LottieView from 'lottie-react-native';
 
 export type WelcomeStepperStepTwoProps = {
   children?: React.ReactNode;
 };
 
 export const WelcomeStepperStepTwo: React.FC<WelcomeStepperStepTwoProps> = () => {
+  const { width } = useWindowDimensions();
+
   return (
     <View style={[commonStyles.flexFull, commonStyles.flexCenter]}>
-      <Image
-        source={require('$assets/driver-texting@2.png')}
-        style={{ width: '90%', objectFit: 'contain' }}
+      <LottieView
+        source={require('$assets/car.lottie')}
+        autoPlay
+        loop
+        style={{ height: width, width: '100%' }}
       />
       <Text variant='headlineSmall'>Pick people while going to your destination</Text>
       <Text variant='bodyLarge'>and take money from them!</Text>

@@ -2,12 +2,14 @@ import { createGraphQLCRUDEntity } from '$libs/graphql-react-query/create-graphq
 import { createTripDocument } from './mutations/create-trip';
 import { joinTripDocument } from './mutations/join-trip';
 import { mapTripsDocument } from './queries/map-trips';
+import { singleTripDocument } from './queries/single-trip';
 import { tripsDocument } from './queries/trips';
 
 export const {
-  queries: [useTripsQuery, useMapTripsQuery],
+  queries: [useTripsQuery, useMapTripsQuery, useSingleTripQuery],
   mutations: [useJoinTripMutation, useCreateTripMutation],
-} = createGraphQLCRUDEntity(tripsDocument, mapTripsDocument)(
-  joinTripDocument,
-  createTripDocument
-);
+} = createGraphQLCRUDEntity(
+  tripsDocument,
+  mapTripsDocument,
+  singleTripDocument
+)(joinTripDocument, createTripDocument);

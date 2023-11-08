@@ -1,12 +1,13 @@
 import { RootStackParamList, RootStackScreenProps } from '$navigation/model';
-import { CompositeScreenProps } from '@react-navigation/native';
+import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabsParamList, MainTabsScreenProps } from '../model';
+import { AccountStackParamList } from './account/model';
 
 export type ProfileStackParamList = {
   Login: undefined;
   SignUp: undefined;
-  Account: undefined;
+  Account: NavigatorScreenParams<AccountStackParamList>;
   OTP: {
     phone: string;
     // TODO: remove later.

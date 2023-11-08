@@ -3,69 +3,62 @@ import {
   MaskedTextInputProps,
 } from '$components/dumb/masked-text-input';
 import { useAppTheme } from '$theme/hook';
+import { FieldComponentProps, createField } from '$tools/create-field';
 import { mergeFunctions } from '$tools/merge-functions';
 import React, { forwardRef, memo } from 'react';
-import { Controller, ControllerProps, useFormContext } from 'react-hook-form';
 import { mergeRefs } from 'react-merge-refs';
-import { View } from 'react-native';
+import { View, ViewProps } from 'react-native';
 import { HelperText } from 'react-native-paper';
 
 export type MaskedTextFieldProps = {
-  //
-} & Omit<ControllerProps, 'render' | 'control'> &
-  MaskedTextInputProps;
+  viewContainerProps?: ViewProps;
+} & MaskedTextInputProps;
 
-export const MaskedTextField = memo(
-  forwardRef<React.ComponentRef<typeof MaskedTextInput>, MaskedTextFieldProps>(
-    function MaskedTextField(
-      { name, defaultValue, disabled, rules, shouldUnregister, ...props },
+export const MaskedTextField = createField<MaskedTextFieldProps>(
+  memo(
+    forwardRef<
+      React.ComponentRef<typeof MaskedTextInput>,
+      FieldComponentProps<MaskedTextFieldProps>
+    >(function MaskedTextField(
+      {
+        form: {
+          field: { ref, onChange, onBlur, value, disabled },
+          fieldState: { error },
+        },
+        viewContainerProps,
+        ...props
+      },
       forwardedRef
     ) {
-      const { control } = useFormContext();
       const theme = useAppTheme();
 
-      return (
-        <Controller
-          name={name}
-          defaultValue={defaultValue}
-          disabled={disabled}
-          rules={rules}
-          shouldUnregister={shouldUnregister}
-          control={control}
-          render={({
-            field: { ref, onChange, onBlur, value, disabled },
-            fieldState: { error },
-          }) => {
-            const color = error ? theme.colors.error : undefined;
+      const color = error ? theme.colors.error : undefined;
 
-            return (
-              <View>
-                <MaskedTextInput
-                  mode='outlined'
-                  disabled={disabled}
-                  outlineColor={color}
-                  textColor={color}
-                  cursorColor={color}
-                  underlineColor={color}
-                  activeOutlineColor={color}
-                  activeUnderlineColor={color}
-                  placeholderTextColor={color}
-                  {...props}
-                  ref={mergeRefs([ref, forwardedRef])}
-                  onBlur={mergeFunctions(onBlur, props.onBlur)}
-                  onChangeText={mergeFunctions(onChange, props.onChangeText)}
-                  value={value}
-                />
-                {error && (
-                  <HelperText type='error' visible>
-                    {error.message}
-                  </HelperText>
-                )}
-              </View>
-            );
-          }}
-        />
+      return (
+        <View {...viewContainerProps}>
+          <MaskedTextInput
+            mode='outlined'
+            disabled={disabled}
+            outlineColor={color}
+            textColor={color}
+            cursorColor={color}
+            underlineColor={color}
+            activeOutlineColor={color}
+            activeUnderlineColor={color}
+            placeholderTextColor={color}
+            {...props}
+            ref={mergeRefs([ref, forwardedRef])}
+            onBlur={mergeFunctions(onBlur, props.onBlur)}
+            onChangeText={mergeFunctions(onChange, props.onChangeText)}
+            value={value + ''}
+          />
+          {error && (
+            <HelperText type='error' visible>
+              {error.message}
+            </HelperText>
+          )}
+        </View>
       );
-    }
+    })
   )
 );

@@ -6,8 +6,9 @@
     "source.fixAll.eslint": true
   },
   "cSpell.words": [
-    "mmkv",
     "dropoff",
-    "latlng"
+    "latlng",
+    "mmkv",
+    "searchbar"
   ],
 }

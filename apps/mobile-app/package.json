@@ -49,6 +49,9 @@
     "graphql-request": "*",
     "react-native-permissions": "*",
     "@graphql-codegen/cli": "*",
-    "react-native-maps-directions": "*"
+    "react-native-maps-directions": "*",
+    "react-error-boundary": "*",
+    "lottie-react-native": "*",
+    "@mapbox/sphericalmercator": "*"
   }
 }

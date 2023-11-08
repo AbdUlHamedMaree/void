@@ -1,8 +1,9 @@
 import { storage } from '$libs/mmkv';
+import { API_BASE_URL } from '@env';
 import axios from 'axios';
 
 export const request = axios.create({
-  baseURL: 'http://192.168.1.63:3000', //API_BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 4_000,
 });
 

@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { type TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { UseQueryOptions, UseQueryResult, useQuery } from '@tanstack/react-query';
+import {
+  DefaultError,
+  UseQueryOptions,
+  UseQueryResult,
+  useQuery,
+} from '@tanstack/react-query';
 import { GraphQlRequestAxiosConfig, graphqlRequest } from '$libs/axios/graphql';
 import { RemoveIndex } from 'graphql-request/build/esm/helpers';
 import { Variables } from 'graphql-request';
@@ -13,7 +18,7 @@ export const useGraphQLQuery = <
   TVariables = Variables,
   TKey extends unknown[] = [string, TVariables?],
   THookOptions = Omit<
-    UseQueryOptions<TData, unknown, TData, TKey>,
+    UseQueryOptions<TData, DefaultError, TData, TKey>,
     'queryKey' | 'queryFn' | 'initialData'
   > & { initialData?: () => undefined },
 >(
@@ -24,7 +29,7 @@ export const useGraphQLQuery = <
     ? [TVariables?, THookOptions?, GraphQlRequestAxiosConfig?]
     : [TVariables, THookOptions?, GraphQlRequestAxiosConfig?]
 ): UseGraphQLQueryReturn<TData> =>
-  useQuery<TData, unknown, TData, TKey>({
+  useQuery<TData, DefaultError, TData, TKey>({
     ...options,
     queryKey: [(document.definitions[0] as any).name.value, variables] as TKey,
     queryFn: ({ queryKey, signal }) =>

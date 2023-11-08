@@ -5,7 +5,8 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'html', 'tsx', 'jsx'],
   setupFilesAfterEnv: ['<rootDir>/test-setup.ts'],
   moduleNameMapper: {
-    '\\.svg$': '@nx/react-native/plugins/jest/svg-mock'
+    '\\.svg$': '@nx/react-native/plugins/jest/svg-mock',
+    '\\.(lottie)$': '<rootDir>/__mocks__/lottieMock.js',
   },
   coverageDirectory: '../../coverage/apps/mobile-app'
 };

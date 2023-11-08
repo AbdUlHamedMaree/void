@@ -1,6 +1,8 @@
+import { useViewWidth } from '$hooks/use-view-width';
 import { commonStyles } from '$styles/common';
+import LottieView from 'lottie-react-native';
 import { View } from 'react-native';
-import { ActivityIndicator, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
 export type LoadingSectionProps = {
   loading?: boolean;
@@ -15,16 +17,25 @@ export const LoadingSection: React.FC<LoadingSectionProps> = ({
   empty,
   children,
 }) => {
+  const viewWidth = useViewWidth();
+
   if (loading)
     return (
       <View
+        ref={viewWidth.ref}
+        onLayout={viewWidth.measureWidth}
         style={[
           commonStyles.flexFull,
           commonStyles.justifyCenter,
           commonStyles.itemsCenter,
         ]}
       >
-        <ActivityIndicator animating />
+        <LottieView
+          source={require('$assets/loading.lottie')}
+          autoPlay
+          loop
+          style={{ height: viewWidth.width, width: '100%' }}
+        />
       </View>
     );
 

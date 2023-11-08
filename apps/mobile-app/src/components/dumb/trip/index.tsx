@@ -1,15 +1,14 @@
 import { MaterialCommunityIcon } from '$components/icons';
-import { commonStyles } from '$styles/common';
 import { spacing } from '$theme/spacing';
 import React, { memo, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button, Card, CardProps, Divider, IconButton, Text } from 'react-native-paper';
 import { format } from 'date-fns';
 import { useAppTheme } from '$theme/hook';
 import { TripCardModel } from '$fragments/trip-card';
 
 export type TripProps = TripCardModel & {
-  disableJoinButton?: boolean | null;
+  joined?: boolean | null;
 
   onJoin?: () => void;
   onShowMore?: () => void;
@@ -23,7 +22,7 @@ export const Trip = memo<TripProps>(function Trip({
   pickupAddress,
   dropoffAddress,
 
-  disableJoinButton,
+  joined,
   onJoin,
   onShowMore,
   onClose,
@@ -41,22 +40,27 @@ export const Trip = memo<TripProps>(function Trip({
   const theme = useAppTheme();
 
   return (
-    <Card {...props}>
+    <Card {...props} id={undefined}>
       <Card.Content style={styles.cardContent}>
-        <Text variant='titleMedium'>
-          {pickupAddress.addressLineOne ?? 'Unknown Source'}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <MaterialCommunityIcon name='car' size={24} color={theme.colors.primary} />
+          <Text variant='titleMedium' style={{ marginLeft: spacing.md, flex: 1 }}>
+            {pickupAddress.addressLineOne ?? 'Unknown Destination'}
+          </Text>
+        </View>
 
-        <MaterialCommunityIcon
-          name='arrow-down'
-          color={theme.colors.text}
-          size={24}
-          style={commonStyles.textCenter}
-        />
-
-        <Text variant='titleMedium'>
-          {dropoffAddress.addressLineOne ?? 'Unknown Destination'}
-        </Text>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.lg }}
+        >
+          <MaterialCommunityIcon
+            name='flag-checkered'
+            size={24}
+            color={theme.colors.primary}
+          />
+          <Text variant='titleMedium' style={{ marginLeft: spacing.md, flex: 1 }}>
+            {dropoffAddress.addressLineOne ?? 'Unknown Destination'}
+          </Text>
+        </View>
 
         {onClose && (
           <IconButton
@@ -67,17 +71,37 @@ export const Trip = memo<TripProps>(function Trip({
           />
         )}
 
-        <Divider />
-
-        <Text variant='titleMedium'>{formattedTime}</Text>
-
-        <Text variant='titleMedium'>{emptySeatsCount} Seats left</Text>
+        <Divider style={{ marginVertical: spacing.sm }} />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcon
+              name='clock-time-four-outline'
+              size={24}
+              color={theme.colors.primary}
+            />
+            <Text variant='titleMedium' style={{ marginLeft: spacing.md }}>
+              {formattedTime}
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcon
+              name='car-seat'
+              size={24}
+              color={theme.colors.primary}
+            />
+            <Text variant='titleMedium' style={{ marginLeft: spacing.md }}>
+              {emptySeatsCount} Seats left
+            </Text>
+          </View>
+        </View>
       </Card.Content>
-      <Card.Actions>
-        <Button onPress={onJoin} disabled={!!disableJoinButton || emptySeatsCount === 0}>
-          Join
+      <Card.Actions style={{ marginTop: spacing.lg }}>
+        <Button mode='text' onPress={onJoin} disabled={!!joined || emptySeatsCount === 0}>
+          {joined ? 'Joined' : 'Join'}
         </Button>
-        <Button onPress={onShowMore}>Show More</Button>
+        <Button mode='outlined' onPress={onShowMore}>
+          Show More
+        </Button>
       </Card.Actions>
     </Card>
   );

@@ -61,7 +61,10 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
       storage.accessToken.set(accessToken);
       storage.refreshToken.set(refreshToken);
 
-      navigate('Main', { screen: 'Profile', params: { screen: 'Account' } });
+      navigate('Main', {
+        screen: 'Profile',
+        params: { screen: 'Account', params: { screen: 'Main' } },
+      });
     } catch (err) {
       console.error(err);
 
@@ -115,7 +118,7 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
           padding: spacing.sm,
           marginTop: spacing.xl,
         }}
-        loading={loginMutation.isLoading}
+        loading={loginMutation.isPending}
       >
         Login
       </PaperButton>

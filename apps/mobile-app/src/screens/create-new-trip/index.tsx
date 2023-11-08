@@ -1,11 +1,11 @@
 import { commonStyles } from '$styles/common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Button, SegmentedButtons } from 'react-native-paper';
+import { Button, IconButton, SegmentedButtons } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
 import { DateTimeField } from '$components/fields/date-time';
 import { TextField } from '$components/fields/text';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import MapView, { MapPressEvent, Marker } from 'react-native-maps';
 import { PaperBottomSheet } from '$components/dumb/paper-bottom-sheet';
 import { useAtomValue } from 'jotai';
@@ -44,7 +44,7 @@ const validationSchema = object({
   dropoffAddress: addressValidation,
 
   capacity: coerce.number(),
-  plannedAt: date(),
+  plannedAt: date().min(new Date()),
   // type: union([literal('one-time'), literal('routine')]),
 });
 
@@ -57,12 +57,14 @@ export type CreateNewTripScreenProps = {
 };
 
 export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
-  const { navigate } = useNavigation();
+  const { navigate, goBack } = useNavigation();
 
   const createTripMutation = useCreateTripMutation();
 
   const theme = useAppTheme();
   const initialMapRegion = useAtomValue(mapRegionAtom);
+
+  const bottomSheetRef = useRef<React.ComponentRef<typeof PaperBottomSheet>>(null);
 
   const [activeButton, setActiveButton] = useState<'pickup' | 'dropoff'>('pickup');
 
@@ -100,7 +102,7 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
     }
   });
 
-  const snapPoints = useMemo(() => ['20%', '80%'], []);
+  const snapPoints = useMemo(() => ['8%', '60%'], []);
 
   const [pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude] = watch([
     'pickupLatitude',
@@ -135,7 +137,9 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
         setValue('dropoffLatitude', coordinate.latitude);
         setValue('dropoffLongitude', coordinate.longitude);
         resetField('dropoffAddress');
+        setTimeout(() => bottomSheetRef.current?.snapToIndex(1), 200);
       }
+      setActiveButton(v => (v === 'pickup' ? 'dropoff' : 'pickup'));
     },
     [activeButton, resetField, setValue]
   );
@@ -208,8 +212,19 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
           ]}
         />
       </View>
+      <IconButton
+        icon='arrow-left'
+        mode='contained'
+        onPress={() => goBack()}
+        style={{ position: 'absolute', left: 8, top: 8 }}
+      />
 
-      <PaperBottomSheet index={0} snapPoints={snapPoints} onChange={onSnapChange}>
+      <PaperBottomSheet
+        ref={bottomSheetRef}
+        index={0}
+        snapPoints={snapPoints}
+        onChange={onSnapChange}
+      >
         <SafeAreaView
           style={[
             commonStyles.flexFull,
@@ -249,8 +264,8 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
             <Button
               mode='contained'
               onPress={onSubmit}
-              loading={createTripMutation.status === 'loading'}
-              disabled={createTripMutation.status === 'loading'}
+              loading={createTripMutation.isPending}
+              disabled={createTripMutation.isPending}
             >
               Create
             </Button>
