@@ -7,15 +7,17 @@ import { tripsFiltersAtom } from '$atoms/trips-filters';
 import { View } from 'react-native';
 import { MainProfileAccountMainScreen } from '$screens/main/profile/account/main';
 import { MainProfileAccountMyTripsScreen } from '$screens/main/profile/account/my-trips';
+import { SingleTripsScreen } from '$screens/main/trips/single';
+import { TripsFiltersScreen } from '$screens/main/trips/filters';
 
-export const AccountStackNavigation: React.FC = () => {
+export const MainProfileAccountStackNavigation: React.FC = () => {
   const { navigate } = useNavigation();
   const tripsFilters = useAtomValue(tripsFiltersAtom);
 
   return (
-    <AccountStackNavigator.Navigator initialRouteName='Main'>
+    <AccountStackNavigator.Navigator initialRouteName='AccountMain'>
       <AccountStackNavigator.Screen
-        name='Main'
+        name='AccountMain'
         component={MainProfileAccountMainScreen}
         options={{ headerShown: false }}
       />
@@ -30,7 +32,10 @@ export const AccountStackNavigation: React.FC = () => {
               <IconButton
                 icon='filter-outline'
                 onPress={() =>
-                  navigate('Main', { screen: 'Trips', params: { screen: 'Filters' } })
+                  navigate('Main', {
+                    screen: 'Profile',
+                    params: { screen: 'Account', params: { screen: 'TripsFilters' } },
+                  })
                 }
               />
               <Badge
@@ -41,6 +46,17 @@ export const AccountStackNavigation: React.FC = () => {
             </View>
           ),
         }}
+      />
+      <AccountStackNavigator.Screen
+        name='SingleTrip'
+        component={SingleTripsScreen}
+        options={{ headerShown: false }}
+        getId={({ params }) => params.id + ''}
+      />
+      <AccountStackNavigator.Screen
+        name='TripsFilters'
+        component={TripsFiltersScreen}
+        options={{ headerShown: true }}
       />
     </AccountStackNavigator.Navigator>
   );

@@ -1,4 +1,4 @@
-import MapView, { BoundingBox, Details, Polygon, Region } from 'react-native-maps';
+import MapView, { Details, LatLng, Region } from 'react-native-maps';
 import { commonStyles } from '$styles/common';
 import { useAtom } from 'jotai/react';
 import { mapRegionAtom } from '$atoms/map-region';
@@ -15,7 +15,6 @@ import { GOOGLE_SERVICES_API } from '@env';
 import { Trip } from '$components/dumb/trip';
 import { MapTrip } from '$components/dumb/map-trip';
 import { toTripRoute } from '$fragments/trip-route';
-import { useGetRegionBoundaries } from '$hooks/use-get-region-boundaries';
 
 export type MainHomeScreenProps = {
   //
@@ -23,14 +22,18 @@ export type MainHomeScreenProps = {
 
 export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
   const mapRef = useRef<MapView>(null);
-  const getRegionBoundaries = useGetRegionBoundaries();
 
   const [focusedTripId, setFocusedTripId] = useState<IDUnion | undefined>();
-  const [mapBoundaries, setMapBoundaries] = useState<BoundingBox>();
+  const [mapBoundaries, setMapBoundaries] = useState<{
+    topLeft: LatLng;
+    topRight: LatLng;
+    bottomLeft: LatLng;
+    bottomRight: LatLng;
+  }>();
 
   const tripsQuery = useMapTripsQuery({
     tripsQueryFilters: {
-      // boundaries: mapBoundaries,
+      boundaries: mapBoundaries,
     },
   });
 
@@ -38,46 +41,40 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
 
   const trips = tripsQuery.data?.trips.items;
 
+  type SingleTrip = Exclude<typeof trips, undefined>[number];
+
   const [mapRegion, setMapRegion] = useAtom(mapRegionAtom);
   const colorSchema = useAppColorSchema();
 
-  const onMarkerClick = useCallback((id: IDUnion) => setFocusedTripId(id), []);
+  const onMarkerClick = useCallback((trip: SingleTrip) => {
+    setFocusedTripId(trip.id);
 
-  const box = useMemo(() => {
+    mapRef.current?.fitToCoordinates([pickupToLatlng(trip), dropoffToLatlng(trip)]);
+  }, []);
+
+  const calculateAndSetBoundaries = useCallback(async () => {
+    const mapBoundaries = await mapRef.current?.getMapBoundaries();
+
     if (!mapBoundaries) return;
 
-    const { eastLongitude, northLatitude, southLatitude, westLongitude } =
-      getRegionBoundaries(mapRegion);
-
-    // return [
-    //   { latitude: northLatitude, longitude: westLongitude },
-    //   { latitude: northLatitude, longitude: eastLongitude },
-    //   { latitude: southLatitude, longitude: eastLongitude },
-    //   { latitude: southLatitude, longitude: westLongitude },
-    // ];
-
-    return [mapBoundaries?.northEast, mapBoundaries?.southWest];
-  }, [getRegionBoundaries, mapBoundaries, mapRegion]);
-
-  const calculateAndSetBoundaries = useCallback(async (region: Region) => {
-    const a = await mapRef.current?.getMapBoundaries();
-
-    if (!a) return;
-
-    setMapBoundaries(a);
-
-    // setMapBoundaries({
-    //   left: topLeft,
-    //   top: topRight,
-    //   right: bottomLeft,
-    //   bottom: bottomRight,
-    // });
+    setMapBoundaries({
+      topLeft: {
+        latitude: mapBoundaries.northEast.latitude,
+        longitude: mapBoundaries.southWest.longitude,
+      },
+      topRight: mapBoundaries.northEast,
+      bottomLeft: mapBoundaries.southWest,
+      bottomRight: {
+        latitude: mapBoundaries.southWest.latitude,
+        longitude: mapBoundaries.northEast.longitude,
+      },
+    });
   }, []);
 
   const handleRegionChangeComplete = useCallback(
     async (region: Region, _details: Details) => {
       setMapRegion(region);
-      calculateAndSetBoundaries(region);
+      calculateAndSetBoundaries();
     },
     [setMapRegion, calculateAndSetBoundaries]
   );
@@ -88,8 +85,8 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
         <MapTrip
           key={trip.id}
           {...toTripRoute(trip)}
-          onPickupMarkerClick={() => onMarkerClick(trip.id)}
-          onDropoffMarkerClick={() => onMarkerClick(trip.id)}
+          onPickupMarkerClick={() => onMarkerClick(trip)}
+          onDropoffMarkerClick={() => onMarkerClick(trip)}
         />
       )),
     [onMarkerClick, trips]
@@ -122,10 +119,10 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
         initialRegion={mapRegion}
         userInterfaceStyle={colorSchema}
         onRegionChangeComplete={handleRegionChangeComplete}
+        rotateEnabled={false}
       >
         {tripsMarkers}
         {focusedTripMapViewDirections}
-        {box && <Polygon coordinates={box} />}
       </MapView>
       {focusedTrip && (
         <Trip

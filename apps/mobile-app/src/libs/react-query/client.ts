@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, keepPreviousData } from '@tanstack/react-query';
 import './online-manager';
 
 export const queryClient = new QueryClient({
@@ -11,6 +11,7 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: true,
       refetchOnWindowFocus: true,
       refetchIntervalInBackground: false,
+      placeholderData: keepPreviousData,
     },
     mutations: {},
   },

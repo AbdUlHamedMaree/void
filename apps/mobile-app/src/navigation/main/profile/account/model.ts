@@ -5,8 +5,12 @@ import { ProfileStackScreenProps } from '../model';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export type AccountStackParamList = {
-  Main: undefined;
+  AccountMain: undefined;
   MyTrips: undefined;
+  TripsFilters: undefined;
+  SingleTrip: {
+    id: number;
+  };
 };
 
 export type AccountStackScreenProps<T extends keyof AccountStackParamList> =

@@ -42,6 +42,7 @@ export const TripsStackNavigation: React.FC = () => {
         name='Single'
         component={SingleTripsScreen}
         options={{ headerShown: false }}
+        getId={({ params }) => params.id + ''}
       />
       <TripsStackNavigator.Screen
         name='Filters'

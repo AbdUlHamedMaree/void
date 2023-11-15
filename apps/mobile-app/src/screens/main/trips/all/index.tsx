@@ -137,7 +137,6 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
           />
         )}
       </LoadingSection>
-      <LoadingSection loading />
       <FAB
         icon='plus'
         style={{

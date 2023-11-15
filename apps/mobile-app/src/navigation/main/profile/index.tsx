@@ -5,7 +5,7 @@ import { MainProfileSignUpScreen } from '$screens/main/profile/sign-up';
 import { MainProfileOTPScreen } from '$screens/main/profile/otp';
 import { useMeQuery } from '$apis/user';
 import { LoadingSection } from '$components/dumb/loading-section';
-import { AccountStackNavigation } from './account';
+import { MainProfileAccountStackNavigation } from './account';
 
 export const ProfileStackNavigation: React.FC = () => {
   const { data, isLoading } = useMeQuery();
@@ -21,7 +21,10 @@ export const ProfileStackNavigation: React.FC = () => {
     >
       <ProfileStackNavigator.Screen name='Login' component={MainProfileLoginScreen} />
       <ProfileStackNavigator.Screen name='SignUp' component={MainProfileSignUpScreen} />
-      <ProfileStackNavigator.Screen name='Account' component={AccountStackNavigation} />
+      <ProfileStackNavigator.Screen
+        name='Account'
+        component={MainProfileAccountStackNavigation}
+      />
       <ProfileStackNavigator.Screen name='OTP' component={MainProfileOTPScreen} />
     </ProfileStackNavigator.Navigator>
   );

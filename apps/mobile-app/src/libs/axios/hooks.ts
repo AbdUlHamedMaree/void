@@ -20,6 +20,8 @@ export const useAxiosService = () => {
           storage.accessToken.set(newTokens.getNewTokens.accessToken);
           storage.refreshToken.set(newTokens.getNewTokens.refreshToken);
 
+          originalRequest.headers.Authorization = newTokens.getNewTokens.accessToken;
+
           return request(originalRequest);
         }
 
@@ -50,6 +52,8 @@ export const useAxiosService = () => {
             statusCode = '400';
             message = error.message;
           }
+
+          console.log(JSON.stringify(response.config, null, 2));
 
           const error = new AxiosError(
             message,

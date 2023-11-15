@@ -41,7 +41,7 @@ export const SingleTripsScreen: React.FC<SingleTripsScreenProps> = () => {
     params: { id },
   } = useRoute<TripsStackScreenProps<'Single'>['route']>();
 
-  const { goBack } = useNavigation<TripsStackScreenProps<'Single'>['navigation']>();
+  const { goBack } = useNavigation();
 
   const singleTripQuery = useSingleTripQuery({ singleTripId: id });
   const trip = singleTripQuery.data?.trip;
@@ -66,7 +66,6 @@ export const SingleTripsScreen: React.FC<SingleTripsScreenProps> = () => {
   );
 
   const fitMapToTrip = useCallback(() => {
-    console.log(!mapRef.current || !trip);
     if (!mapRef.current || !trip) return;
 
     const locations = pickupDropoffToLatlng(trip);
@@ -126,7 +125,7 @@ export const SingleTripsScreen: React.FC<SingleTripsScreenProps> = () => {
       <IconButton
         icon='arrow-left'
         mode='contained'
-        onPress={() => goBack()}
+        onPress={goBack}
         style={{ position: 'absolute', left: 8, top: 8 }}
       />
       <IconButton

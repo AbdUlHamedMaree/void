@@ -6,7 +6,6 @@ import { spacing } from '$theme/spacing';
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { VirtualizedList } from 'react-native';
-import { FAB } from 'react-native-paper';
 import { useJoinTripModal } from '$hooks/use-join-trip-modal';
 import { useTripsQuery } from '$apis/trips';
 import { IDUnion } from '$models/id';
@@ -101,8 +100,8 @@ export const MainProfileAccountMyTripsScreen: React.FC<
   const handleShowMore = useCallback(
     (id: number) => {
       navigate('Main', {
-        screen: 'Trips',
-        params: { screen: 'Single', params: { id } },
+        screen: 'Profile',
+        params: { screen: 'Account', params: { screen: 'SingleTrip', params: { id } } },
       });
     },
     [navigate]
@@ -141,16 +140,6 @@ export const MainProfileAccountMyTripsScreen: React.FC<
           />
         )}
       </LoadingSection>
-      <FAB
-        icon='plus'
-        style={{
-          position: 'absolute',
-          margin: 16,
-          right: 0,
-          bottom: 0,
-        }}
-        onPress={() => navigate('CreateNewTrip')}
-      />
       {joinTripModal.modal}
     </ScreenWrapper>
   );

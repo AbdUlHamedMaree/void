@@ -240,10 +240,10 @@ export type QueryTripsArgs = {
 };
 
 export type ScreenGpsBoundariesIt = {
-  bottom: GeoPointIt;
-  left: GeoPointIt;
-  right: GeoPointIt;
-  top: GeoPointIt;
+  bottomLeft: GeoPointIt;
+  bottomRight: GeoPointIt;
+  topLeft: GeoPointIt;
+  topRight: GeoPointIt;
 };
 
 export type SignupAppUsersIt = {

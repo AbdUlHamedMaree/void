@@ -17,7 +17,6 @@ import { queryClient } from '$libs/react-query/client';
 import { useRefetchOnAppFocus } from '$libs/react-query/use-refetch-on-app-focus';
 import { useAxiosService } from '$libs/axios/hooks';
 import { AppErrorBoundary } from '$components/dumb/app-error-boundary';
-import { LogBox } from 'react-native';
 
 Geocoder.init(GOOGLE_SERVICES_API);
 
@@ -44,7 +43,7 @@ const Application: React.FC = () => {
 };
 
 export const App: React.FC = () => {
-  LogBox.ignoreAllLogs();
+  // LogBox.ignoreAllLogs();
 
   return (
     <Suspense fallback={<WeakSplashScreen />}>
