@@ -3,6 +3,7 @@ import { useSignUpMutation } from '$apis/user';
 import { PaperButton } from '$components/dumb/paper-button';
 import { MaskedTextField } from '$components/fields/masked-text';
 import { TextField } from '$components/fields/text';
+import { useShowRootTabs } from '$hooks/use-show-root-tabs';
 import { commonStyles } from '$styles/common';
 import { useAppTheme } from '$theme/hook';
 import { spacing } from '$theme/spacing';
@@ -34,6 +35,8 @@ export type MainProfileSignUpScreenProps = {
 };
 
 export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = () => {
+  useShowRootTabs();
+
   const { navigate } = useNavigation();
   const theme = useAppTheme();
 
@@ -145,7 +148,10 @@ export const MainProfileSignUpScreen: React.FC<MainProfileSignUpScreenProps> = (
         <Text>Already have an account?</Text>
         <Button
           onPress={() =>
-            navigate('Main', { screen: 'Profile', params: { screen: 'Login' } })
+            navigate('Main', {
+              screen: 'Profile',
+              params: { screen: 'Login', params: {} },
+            })
           }
         >
           Login

@@ -19,15 +19,18 @@ import MapViewDirections from 'react-native-maps-directions';
 import { GOOGLE_SERVICES_API } from '@env';
 import { PaperBottomSheet } from '$components/dumb/paper-bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { Button, FAB, IconButton, Text } from 'react-native-paper';
 import { View } from 'react-native';
 import { MaterialCommunityIcon } from '$components/icons';
 import { useAppTheme } from '$theme/hook';
 import { spacing } from '$theme/spacing';
 import { format } from 'date-fns';
 import { useJoinTripModal } from '$hooks/use-join-trip-modal';
-import { useCheckIsUserInTrip } from '$hooks/use-check-is-user-in-trip';
 import { useHideRootTabs } from '$hooks/use-hide-root-tabs';
+import { useIsUserPartOfTheTrip } from '$hooks/use-is-user-in-trip';
+import { useToggleState } from '$hooks/use-toggle-state';
+
+const BOTTOM_SHEET_CLOSED_SIZE = 48;
 
 export type SingleTripsScreenProps = {
   //
@@ -35,6 +38,7 @@ export type SingleTripsScreenProps = {
 
 export const SingleTripsScreen: React.FC<SingleTripsScreenProps> = () => {
   useHideRootTabs();
+
   const theme = useAppTheme();
 
   const {
@@ -48,16 +52,13 @@ export const SingleTripsScreen: React.FC<SingleTripsScreenProps> = () => {
 
   const [isMapFittedToTrip, setIsMapFittedToTrip] = useState(false);
 
+  const fabState = useToggleState();
+
   const initialMapRegion = useAtomValue(mapRegionAtom);
 
   const mapRef = useRef<MapView>(null);
 
-  const checkIsUserInTrip = useCheckIsUserInTrip();
-
-  const isUserInTrip = useMemo(
-    () => !!(trip && checkIsUserInTrip(trip)),
-    [checkIsUserInTrip, trip]
-  );
+  const isUserInTrip = useIsUserPartOfTheTrip(trip);
 
   const handleRegionChangeComplete = useCallback(
     (_region: Region, details: Details) =>
@@ -128,13 +129,36 @@ export const SingleTripsScreen: React.FC<SingleTripsScreenProps> = () => {
         onPress={goBack}
         style={{ position: 'absolute', left: 8, top: 8 }}
       />
+
       <IconButton
         icon={isMapFittedToTrip ? 'crosshairs-gps' : 'crosshairs'}
         mode='contained'
         onPress={fitMapToTrip}
         style={{ position: 'absolute', right: 8, top: 8 }}
       />
-      <PaperBottomSheet index={0} snapPoints={['8%', '40%']}>
+
+      <FAB.Group
+        visible
+        open={fabState.isOpen}
+        icon={fabState.isOpen ? 'close' : 'plus'}
+        actions={[
+          {
+            icon: 'chat-outline',
+            label: 'Chat',
+            onPress: () => console.log('Chat Pressed'),
+          },
+          {
+            icon: 'logout',
+            label: 'Leave Trip',
+            onPress: () => console.log('Logout Pressed'),
+          },
+        ]}
+        onStateChange={({ open }) => fabState.set(open)}
+        style={{
+          bottom: BOTTOM_SHEET_CLOSED_SIZE,
+        }}
+      />
+      <PaperBottomSheet index={0} snapPoints={[BOTTOM_SHEET_CLOSED_SIZE, '40%']}>
         <SafeAreaView style={[commonStyles.flexFull, commonStyles.screenPadding]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcon name='car' size={24} color={theme.colors.primary} />

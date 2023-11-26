@@ -29,7 +29,7 @@ export const AppErrorBoundary: React.FC<
   React.PropsWithChildren<AppErrorBoundaryProps>
 > = ({ children, ...props }) => {
   const onError = useCallback(
-    () => mergeFunctions(console.log, props.onError),
+    () => mergeFunctions(console.error, props.onError),
     [props.onError]
   );
 

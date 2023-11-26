@@ -8,5 +8,5 @@ module.exports = {
     '\\.svg$': '@nx/react-native/plugins/jest/svg-mock',
     '\\.(lottie)$': '<rootDir>/__mocks__/lottieMock.js',
   },
-  coverageDirectory: '../../coverage/apps/mobile-app'
+  coverageDirectory: '../../coverage/apps/mobile-app',
 };

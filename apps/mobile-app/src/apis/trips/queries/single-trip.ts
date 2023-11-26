@@ -7,6 +7,8 @@ export const singleTripDocument = graphql(`
       capacity
       occupiedSeats
       plannedAt
+
+      driverId
       passengers {
         id
       }

@@ -2,6 +2,7 @@ import { TripsFiltersModel, tripsFiltersAtom } from '$atoms/trips-filters';
 import { DateTimeField } from '$components/fields/date-time';
 import { TextField } from '$components/fields/text';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
+import { useHideRootTabs } from '$hooks/use-hide-root-tabs';
 import { createKeyGetter } from '$libs/react-hook-form/create-key-getter';
 import { commonStyles } from '$styles/common';
 import { spacing } from '$theme/spacing';
@@ -37,6 +38,8 @@ export type TripsFiltersScreenProps = {
 };
 
 export const TripsFiltersScreen: React.FC<TripsFiltersScreenProps> = () => {
+  useHideRootTabs();
+
   const { navigate, setOptions } = useNavigation();
   const [tripsFilters, setTripsFilters] = useAtom(tripsFiltersAtom);
 
@@ -69,14 +72,14 @@ export const TripsFiltersScreen: React.FC<TripsFiltersScreenProps> = () => {
     () =>
       methods.handleSubmit(values => {
         setTripsFilters(values);
-        navigate('Main', { screen: 'Trips', params: { screen: 'All' } });
+        navigate('Main', { screen: 'Trips', params: { screen: 'All', params: {} } });
       }),
     [methods, navigate, setTripsFilters]
   );
 
   const handleClearFilters = useCallback(() => {
     setTripsFilters(undefined);
-    navigate('Main', { screen: 'Trips', params: { screen: 'All' } });
+    navigate('Main', { screen: 'Trips', params: { screen: 'All', params: {} } });
   }, [navigate, setTripsFilters]);
 
   useLayoutEffect(() => {

@@ -52,6 +52,7 @@
     "react-native-maps-directions": "*",
     "react-error-boundary": "*",
     "lottie-react-native": "*",
-    "@mapbox/sphericalmercator": "*"
+    "@mapbox/sphericalmercator": "*",
+    "graphql-ws": "*"
   }
 }

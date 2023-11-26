@@ -6,6 +6,7 @@ import { resolveRequestDocument, type RequestDocument, Variables } from 'graphql
 import { type TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { AxiosGraphQlSuccessResponse } from './response';
 import { RemoveIndex } from 'graphql-request/build/esm/helpers';
+import { API_GRAPHQL_PATHNAME } from '@env';
 
 export type GraphQlRequestAxiosConfig = Omit<
   AxiosRequestConfig,
@@ -22,10 +23,10 @@ export const graphqlRequest = <TResult, TVariables = Variables>(
 ): Promise<TResult> =>
   request
     .post<any, AxiosGraphQlSuccessResponse<TResult>>(
-      'graphql',
+      API_GRAPHQL_PATHNAME,
       {
         ...resolveRequestDocument(document),
-        variables: variables,
+        variables,
       },
       config
     )

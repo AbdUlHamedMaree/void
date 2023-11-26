@@ -95,7 +95,7 @@ export const CreateNewTripScreen: React.FC<CreateNewTripScreenProps> = () => {
           category: 'one_time',
         },
       });
-      navigate('Main', { screen: 'Home' });
+      navigate('Main', { screen: 'Home', params: {} });
       toast.success('Trip created successfully!');
     } catch (err) {
       console.error(err);

@@ -23,6 +23,7 @@ export const MainProfileAccountMyTripsScreen: React.FC<
   MainProfileAccountMyTripsScreenProps
 > = () => {
   useHideRootTabs();
+
   const tripsFilters = useAtomValue(tripsFiltersAtom);
 
   const tripsQueryFilters = useMemo<InputMaybe<GetTripsFiltersIt>>(

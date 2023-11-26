@@ -14,12 +14,15 @@ import { useAtomValue } from 'jotai';
 import { tripsFiltersAtom } from '$atoms/trips-filters';
 import { GetTripsFiltersIt, InputMaybe } from '$gql/graphql';
 import { useCheckIsUserInTrip } from '$hooks/use-check-is-user-in-trip';
+import { useShowRootTabs } from '$hooks/use-show-root-tabs';
 
 export type AllTripsScreenProps = {
   //
 };
 
 export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
+  useShowRootTabs();
+
   const tripsFilters = useAtomValue(tripsFiltersAtom);
 
   const tripsQueryFilters = useMemo<InputMaybe<GetTripsFiltersIt>>(
@@ -145,7 +148,7 @@ export const AllTripsScreen: React.FC<AllTripsScreenProps> = () => {
           right: 0,
           bottom: 0,
         }}
-        onPress={() => navigate('CreateNewTrip')}
+        onPress={() => navigate('CreateNewTrip', {})}
       />
       {joinTripModal.modal}
     </ScreenWrapper>

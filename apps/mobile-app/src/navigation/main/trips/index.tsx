@@ -1,13 +1,13 @@
 import React from 'react';
 import { TripsStackNavigator } from './navigator';
 import { AllTripsScreen } from '$screens/main/trips/all';
-import { SingleTripsScreen } from '$screens/main/trips/single';
 import { Badge, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { TripsFiltersScreen } from '$screens/main/trips/filters';
 import { useAtomValue } from 'jotai';
 import { tripsFiltersAtom } from '$atoms/trips-filters';
 import { View } from 'react-native';
+import { ChatSingleTripsMainScreen } from '$screens/main/trips/single/chat';
 
 export const TripsStackNavigation: React.FC = () => {
   const { navigate } = useNavigation();
@@ -26,7 +26,10 @@ export const TripsStackNavigation: React.FC = () => {
               <IconButton
                 icon='filter-outline'
                 onPress={() =>
-                  navigate('Main', { screen: 'Trips', params: { screen: 'Filters' } })
+                  navigate('Main', {
+                    screen: 'Trips',
+                    params: { screen: 'Filters', params: {} },
+                  })
                 }
               />
               <Badge
@@ -40,10 +43,16 @@ export const TripsStackNavigation: React.FC = () => {
       />
       <TripsStackNavigator.Screen
         name='Single'
+        component={ChatSingleTripsMainScreen}
+        options={{ headerShown: true, headerTitle: 'Chat' }}
+        getId={({ params }) => params.id + ''}
+      />
+      {/* <TripsStackNavigator.Screen
+        name='Single'
         component={SingleTripsScreen}
         options={{ headerShown: false }}
         getId={({ params }) => params.id + ''}
-      />
+      /> */}
       <TripsStackNavigator.Screen
         name='Filters'
         component={TripsFiltersScreen}

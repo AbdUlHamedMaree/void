@@ -14,6 +14,7 @@ import { Button, Divider, IconButton, Text } from 'react-native-paper';
 import { object, string } from 'zod';
 import { useVerifyOTPMutation } from '$apis/otp';
 import { useQueryClient } from '@tanstack/react-query';
+import { useShowRootTabs } from '$hooks/use-show-root-tabs';
 
 const validationSchema = object({
   otp: string({ required_error: 'Code is required field' }).length(
@@ -27,6 +28,8 @@ export type MainProfileOTPScreenProps = {
 };
 
 export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
+  useShowRootTabs();
+
   const { navigate } = useNavigation();
   const queryClient = useQueryClient();
 
@@ -57,14 +60,15 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
       storage.accessToken.set(accessToken);
       storage.refreshToken.set(refreshToken);
 
-      queryClient.invalidateQueries(['MeQuery']);
+      queryClient.invalidateQueries({ queryKey: ['MeQuery'] });
 
       navigate('Main', {
         screen: 'Profile',
         params: {
           screen: 'Account',
           params: {
-            screen: 'Main',
+            screen: 'AccountMain',
+            params: {},
           },
         },
       });
@@ -126,7 +130,10 @@ export const MainProfileOTPScreen: React.FC<MainProfileOTPScreenProps> = () => {
         <Text>{phone} isn't your number?</Text>
         <Button
           onPress={() => {
-            navigate('Main', { screen: 'Profile', params: { screen: 'SignUp' } });
+            navigate('Main', {
+              screen: 'Profile',
+              params: { screen: 'SignUp', params: {} },
+            });
           }}
         >
           Change Number

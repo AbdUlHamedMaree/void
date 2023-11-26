@@ -3,16 +3,17 @@ import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/n
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabsParamList, MainTabsScreenProps } from '../model';
 import { AccountStackParamList } from './account/model';
+import { ParamListWithBase } from '$types/param-list-with-base';
 
 export type ProfileStackParamList = {
-  Login: undefined;
-  SignUp: undefined;
+  Login: ParamListWithBase;
+  SignUp: ParamListWithBase;
   Account: NavigatorScreenParams<AccountStackParamList>;
-  OTP: {
+  OTP: ParamListWithBase<{
     phone: string;
     // TODO: remove later.
     otp: string;
-  };
+  }>;
 };
 
 export type ProfileStackScreenProps<T extends keyof ProfileStackParamList> =

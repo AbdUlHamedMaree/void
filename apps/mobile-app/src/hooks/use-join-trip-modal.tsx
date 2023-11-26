@@ -1,7 +1,9 @@
 import { useJoinTripMutation } from '$apis/trips';
+import { useMeQuery } from '$apis/user';
 import { JoinTripFormFields, JoinTripModal } from '$components/smart/join-trip-modal';
 import { TripOt } from '$gql/graphql';
 import { toast } from '$modules/react-native-paper-toast';
+import { useNavigation } from '@react-navigation/native';
 import { isAxiosError } from 'axios';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -14,10 +16,33 @@ export type UseJoinTripModalArg = {
 
 export const useJoinTripModal = ({ trip, onJoin, onCancel }: UseJoinTripModalArg) => {
   const joinTripMutation = useJoinTripMutation();
+  const meQuery = useMeQuery();
+
+  const user = meQuery.data?.me;
 
   const [visible, setVisible] = useState(false);
 
-  const open = useCallback(() => setVisible(true), []);
+  const { navigate } = useNavigation();
+
+  const open = useCallback(() => {
+    if (!user) {
+      return navigate('Main', {
+        screen: 'Profile',
+        params: {
+          screen: 'Login',
+          params: {
+            toast: {
+              message: 'You need to be logged in to be able to join trips!',
+              type: 'warning',
+            },
+          },
+        },
+      });
+    }
+
+    setVisible(true);
+  }, [navigate, user]);
+
   const close = useCallback(() => setVisible(false), []);
 
   const availableSeatsCount = useMemo(

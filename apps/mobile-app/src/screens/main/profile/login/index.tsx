@@ -15,6 +15,7 @@ import { useAppTheme } from '$theme/hook';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
 import { isAxiosError } from 'axios';
 import { useLoginMutation } from '$apis/user';
+import { useShowRootTabs } from '$hooks/use-show-root-tabs';
 
 const validationSchema = object({
   phone: string({ required_error: 'Phone is required field' }).regex(
@@ -32,6 +33,8 @@ export type MainProfileLoginScreenProps = {
 };
 
 export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () => {
+  useShowRootTabs();
+
   const loginMutation = useLoginMutation();
 
   storage.accessToken.get();
@@ -63,7 +66,7 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
 
       navigate('Main', {
         screen: 'Profile',
-        params: { screen: 'Account', params: { screen: 'Main' } },
+        params: { screen: 'Account', params: { screen: 'AccountMain', params: {} } },
       });
     } catch (err) {
       console.error(err);
@@ -133,7 +136,10 @@ export const MainProfileLoginScreen: React.FC<MainProfileLoginScreenProps> = () 
         <Text>Don't have an account?</Text>
         <Button
           onPress={() =>
-            navigate('Main', { screen: 'Profile', params: { screen: 'SignUp' } })
+            navigate('Main', {
+              screen: 'Profile',
+              params: { screen: 'SignUp', params: {} },
+            })
           }
         >
           Sign Up

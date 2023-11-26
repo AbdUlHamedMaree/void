@@ -56,7 +56,11 @@ export const JoinTripModal: React.FC<JoinTripModalProps> = ({
 
   return (
     <Portal>
-      <Dialog visible={!!visible} onDismiss={onCancel}>
+      <Dialog
+        visible={!!visible}
+        onDismiss={onCancel}
+        dismissable={!methods.formState.isSubmitting}
+      >
         <Dialog.Title>Joining Trip</Dialog.Title>
 
         <Dialog.Content>
@@ -72,7 +76,11 @@ export const JoinTripModal: React.FC<JoinTripModalProps> = ({
           </FormProvider>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={onCancel} loading={methods.formState.isSubmitting}>
+          <Button
+            onPress={onCancel}
+            loading={methods.formState.isSubmitting}
+            disabled={methods.formState.isSubmitting}
+          >
             Cancel
           </Button>
           <Button

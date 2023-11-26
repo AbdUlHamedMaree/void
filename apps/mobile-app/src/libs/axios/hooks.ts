@@ -53,8 +53,6 @@ export const useAxiosService = () => {
             message = error.message;
           }
 
-          console.log(JSON.stringify(response.config, null, 2));
-
           const error = new AxiosError(
             message,
             statusCode,

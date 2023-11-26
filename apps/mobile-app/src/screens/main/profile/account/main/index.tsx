@@ -5,6 +5,7 @@ import { DropdownInput } from '$components/inputs/dropdown';
 import { ListItem } from '$components/inputs/select/types';
 import { ScreenWrapper } from '$components/smart/screen-wrapper';
 import { useMMKVState } from '$hooks/use-mmkv-state';
+import { useShowRootTabs } from '$hooks/use-show-root-tabs';
 import { storage } from '$libs/mmkv';
 import { queryClient } from '$libs/react-query/client';
 import { AvailableLanguagesUnion } from '$models/available-languages';
@@ -34,6 +35,8 @@ export type MainProfileAccountMainProps = NativeStackScreenProps<
 >;
 
 export const MainProfileAccountMainScreen: React.FC<MainProfileAccountMainProps> = () => {
+  useShowRootTabs();
+
   const { data } = useMeQuery();
   const user = data?.me;
   const { navigate } = useNavigation();
@@ -56,7 +59,7 @@ export const MainProfileAccountMainScreen: React.FC<MainProfileAccountMainProps>
       queryKey: [(meDocument.definitions[0] as ObjectTypeDefinitionNode).name],
     });
 
-    navigate('Main', { screen: 'Profile', params: { screen: 'Login' } });
+    navigate('Main', { screen: 'Profile', params: { screen: 'Login', params: {} } });
   }, [navigate]);
 
   if (!user) return null;
@@ -80,7 +83,7 @@ export const MainProfileAccountMainScreen: React.FC<MainProfileAccountMainProps>
           onPress={() =>
             navigate('Main', {
               screen: 'Profile',
-              params: { screen: 'Account', params: { screen: 'MyTrips' } },
+              params: { screen: 'Account', params: { screen: 'MyTrips', params: {} } },
             })
           }
         />

@@ -1,6 +1,8 @@
-import { PaperToastContainer } from '$modules/react-native-paper-toast';
+import { PaperToastContainer, toast } from '$modules/react-native-paper-toast';
+import { ToastOptionsModel } from '$modules/react-native-paper-toast/model';
 import { commonStyles } from '$styles/common';
-import { forwardRef, memo } from 'react';
+import { useRoute } from '@react-navigation/native';
+import { forwardRef, memo, useEffect } from 'react';
 import { SafeAreaView, SafeAreaProviderProps } from 'react-native-safe-area-context';
 
 export type ScreenWrapperProps = {
@@ -28,6 +30,17 @@ export const ScreenWrapper = memo(
       },
       forwardRef
     ) {
+      const { params } = useRoute();
+
+      useEffect(() => {
+        if (!params) return;
+        if (!('toast' in params)) return;
+
+        const toastOptions = params.toast as ToastOptionsModel;
+
+        toast(toastOptions);
+      }, [params]);
+
       return (
         <SafeAreaView
           {...props}

@@ -2,6 +2,8 @@ import { GOOGLE_SERVICES_API } from '@env';
 import axios, { AxiosRequestConfig } from 'axios';
 import { BoundingBox, LatLng } from 'react-native-maps';
 
+export type TravelModeUnion = 'DRIVING' | 'BICYCLING' | 'TRANSIT' | 'WALKING';
+
 export type TextValueObject = {
   text: string;
   value: number;
@@ -12,8 +14,8 @@ export type TimeZoneTextValueObject = TextValueObject & {
 };
 
 export type GetGoogleMapsDirectionsArg = {
-  origin: LatLng;
-  destination: LatLng;
+  origin?: LatLng;
+  destination?: LatLng;
 
   alternatives?: boolean;
   departureTime?: number;
@@ -31,17 +33,64 @@ export type GetGoogleMapsDirectionsArg = {
   optimizeWaypoints?: boolean;
 };
 
+export type DirectionsTransitStop = {
+  location: LatLng;
+  name: string;
+};
+
+export type DirectionsTransitAgency = {
+  name?: string;
+  phone?: string;
+  url?: string;
+};
+
+export type DirectionsTransitVehicle = {
+  name: string;
+  // later
+  type: string;
+  icon?: string;
+  local_icon?: string;
+};
+
+export type DirectionsTransitLine = {
+  agencies: DirectionsTransitAgency[];
+  name: string;
+  color?: string;
+  icon?: string;
+  short_name?: string;
+  text_color?: string;
+  url?: string;
+  vehicle?: DirectionsTransitVehicle;
+};
+
+export type DirectionsTransitDetails = {
+  arrival_stop?: DirectionsTransitStop;
+  arrival_time?: TimeZoneTextValueObject;
+  departure_stop?: DirectionsTransitStop;
+  departure_time?: TimeZoneTextValueObject;
+  headsign?: string;
+  headway?: number;
+  line?: DirectionsTransitLine;
+};
+
 export type DirectionsStep = {
   duration: TextValueObject;
   end_location: LatLng;
   html_instructions: string;
-  polyline: any;
+  polyline: DirectionsPolyline;
   start_location: LatLng;
-  travel_mode: any;
+  travel_mode: TravelModeUnion;
   distance?: TextValueObject;
   maneuver?: string;
+  // not found
   steps?: any;
-  transit_details?: any;
+  transit_details?: DirectionsTransitDetails;
+};
+
+export type DirectionsViaWaypoint = {
+  location?: LatLng;
+  step_index?: number;
+  step_interpolation?: number;
 };
 
 export type DirectionsLeg = {
@@ -50,7 +99,7 @@ export type DirectionsLeg = {
   start_address: string;
   start_location: LatLng;
   steps: DirectionsStep[];
-  via_waypoint: any[];
+  via_waypoint: DirectionsViaWaypoint[];
   arrival_time?: TimeZoneTextValueObject;
   departure_time?: TimeZoneTextValueObject;
   distance?: TextValueObject;
@@ -58,15 +107,59 @@ export type DirectionsLeg = {
   duration_in_traffic: TextValueObject;
 };
 
+export type DirectionsPolyline = {
+  points: string;
+};
+
+export type Fare = {
+  currency: string;
+  text: string;
+  value: number;
+};
+
 export type GoogleMapsDirectionsResponseRoutes = {
   bounds: BoundingBox;
   copyrights: string;
   legs: DirectionsLeg[];
-  overview_polyline: any;
+  overview_polyline: DirectionsPolyline;
   summary: string;
   warnings: string[];
   waypoint_order: number[];
-  fare?: any;
+  fare?: Fare;
+};
+
+export type DirectionsGeocodedWaypoint = {
+  geocoder_status?: 'Ok' | 'ZERO_RESULTS';
+  // not found
+  partial_match?: any;
+  place_id?: string;
+  types?: (
+    | 'administrative_area_level_1'
+    | 'administrative_area_level_2'
+    | 'administrative_area_level_3'
+    | 'administrative_area_level_4'
+    | 'administrative_area_level_5'
+    | 'airport'
+    | 'colloquial_area'
+    | 'country'
+    | 'intersection'
+    | 'locality'
+    | 'natural_feature'
+    | 'neighborhood'
+    | 'park'
+    | 'plus_code'
+    | 'point_of_interest'
+    | 'political'
+    | 'postal_code'
+    | 'premise'
+    | 'route'
+    | 'street_address'
+    | 'sublocality'
+    | 'subpremise'
+    | 'tourist_attraction'
+    | 'train_station'
+    | 'transit_station'
+  )[];
 };
 
 export type GetGoogleMapsDirectionsResponseBody = {
@@ -82,9 +175,9 @@ export type GetGoogleMapsDirectionsResponseBody = {
     | 'OVER_QUERY_LIMIT'
     | 'REQUEST_DENIED'
     | 'UNKNOWN_ERROR';
-  available_travel_modes?: any[];
+  available_travel_modes?: TravelModeUnion[];
   error_message?: string;
-  geocoded_waypoints?: any[];
+  geocoded_waypoints?: DirectionsGeocodedWaypoint[];
 };
 
 export const getGoogleMapsDirections = (
@@ -106,7 +199,7 @@ export const getGoogleMapsDirections = (
     waypoints,
 
     optimizeWaypoints,
-  }: GetGoogleMapsDirectionsArg,
+  }: GetGoogleMapsDirectionsArg = {},
   config?: AxiosRequestConfig
 ) => {
   const stringifiedWaypoints = waypoints?.map(getLatLngString).join('|');
@@ -118,8 +211,8 @@ export const getGoogleMapsDirections = (
       params: {
         key: GOOGLE_SERVICES_API,
 
-        origin: getLatLngString(origin),
-        destination: getLatLngString(destination),
+        origin: origin ? getLatLngString(origin) : '',
+        destination: destination ? getLatLngString(destination) : '',
 
         alternatives,
         departureTime,

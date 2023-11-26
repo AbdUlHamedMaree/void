@@ -9,18 +9,23 @@ import { ScreenWrapper } from '$components/smart/screen-wrapper';
 import { useMapTripsQuery } from '$apis/trips';
 import { IDUnion } from '$models/id';
 
-import MapViewDirections from 'react-native-maps-directions';
 import { dropoffToLatlng, pickupToLatlng } from '$helpers/pickup-dropoff-to-latlng';
-import { GOOGLE_SERVICES_API } from '@env';
 import { Trip } from '$components/dumb/trip';
 import { MapTrip } from '$components/dumb/map-trip';
 import { toTripRoute } from '$fragments/trip-route';
+import {
+  useGoogleMapsDirectionsQuery,
+  useDirectionPolyline,
+} from '$libs/google-maps-direction/hook';
+import { useShowRootTabs } from '$hooks/use-show-root-tabs';
 
 export type MainHomeScreenProps = {
   //
 };
 
 export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
+  useShowRootTabs();
+
   const mapRef = useRef<MapView>(null);
 
   const [focusedTripId, setFocusedTripId] = useState<IDUnion | undefined>();
@@ -97,19 +102,23 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
     [focusedTripId, trips]
   );
 
-  const focusedTripMapViewDirections = useMemo(
-    () =>
-      focusedTrip && (
-        <MapViewDirections
-          origin={pickupToLatlng(focusedTrip)}
-          destination={dropoffToLatlng(focusedTrip)}
-          apikey={GOOGLE_SERVICES_API}
-          strokeWidth={4}
-          strokeColor='#0007'
-        />
-      ),
-    [focusedTrip]
+  const focusedTripDirectionsQuery = useGoogleMapsDirectionsQuery(
+    useMemo(
+      () =>
+        focusedTrip
+          ? {
+              origin: pickupToLatlng(focusedTrip),
+              destination: dropoffToLatlng(focusedTrip),
+            }
+          : undefined,
+      [focusedTrip]
+    ),
+    { enabled: !!focusedTrip }
   );
+
+  const focusedTripMapViewDirections = useDirectionPolyline({
+    response: focusedTripDirectionsQuery.data?.data,
+  });
 
   return (
     <ScreenWrapper disablePadding>
@@ -122,7 +131,7 @@ export const MainHomeScreen: React.FC<MainHomeScreenProps> = () => {
         rotateEnabled={false}
       >
         {tripsMarkers}
-        {focusedTripMapViewDirections}
+        {focusedTrip && focusedTripMapViewDirections}
       </MapView>
       {focusedTrip && (
         <Trip
