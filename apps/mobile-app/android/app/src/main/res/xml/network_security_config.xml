@@ -5,4 +5,10 @@
         <domain includeSubdomains="true">45.32.105.38</domain>
         <domain includeSubdomains="true">localhost</domain>
     </domain-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/void"/>
+        </trust-anchors>
+    </base-config>
 </network-security-config>

@@ -10,4 +10,4 @@ const jsonStorage: SyncStorage<any> = {
 };
 
 export const atomWithMMKV = <T>(key: string, initialValue: T) =>
-  atomWithStorage<T>(key, initialValue, jsonStorage, { unstable_getOnInit: true });
+  atomWithStorage<T>(key, initialValue, jsonStorage, { getOnInit: true });

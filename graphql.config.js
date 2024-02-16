@@ -1,6 +1,6 @@
 const { join } = require('path');
 
-const api = process.env.GRAPHQL_CODEGEN_API ?? 'http://45.32.105.38/graphql';
+const api = process.env.GRAPHQL_CODEGEN_API ?? 'https://45.32.105.38/graphql';
 
 const mobileAppSrcURI = join('apps', 'mobile-app', 'src');
 

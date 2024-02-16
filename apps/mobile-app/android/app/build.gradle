@@ -131,6 +131,9 @@ dependencies {
             because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
         }
     }
+
+    // react-native-audio-recorder-player
+    implementation project(':react-native-audio-recorder-player')
     
     androidTestImplementation('com.wix:detox:+')
     implementation 'androidx.appcompat:appcompat:1.1.0'

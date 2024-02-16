@@ -29,6 +29,8 @@ export const useAxiosService = () => {
         storage.refreshToken.delete();
       }
 
+      console.error(JSON.stringify(error, null, 2));
+
       return Promise.reject(error);
     },
     []

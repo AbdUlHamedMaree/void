@@ -7,6 +7,7 @@ import { MessageBar } from '../message-bar';
 import { FlatList } from 'react-native-gesture-handler';
 import { spacing } from '$theme/spacing';
 import { StyleSheet } from 'react-native';
+import { useHideRootTabs } from '$hooks/use-hide-root-tabs';
 
 export type MessagesScreenProps = {
   messageBoxText?: string;
@@ -22,6 +23,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   onSend,
   onMessageBoxChangeText,
 }) => {
+  useHideRootTabs();
   const scrollViewRef = useRef<FlatList<MessageModel>>(null);
 
   const revertedMessages = useMemo(() => messages, [messages]);

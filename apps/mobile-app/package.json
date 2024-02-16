@@ -53,6 +53,7 @@
     "react-error-boundary": "*",
     "lottie-react-native": "*",
     "@mapbox/sphericalmercator": "*",
-    "graphql-ws": "*"
+    "graphql-ws": "*",
+    "react-native-audio-recorder-player": "*"
   }
 }

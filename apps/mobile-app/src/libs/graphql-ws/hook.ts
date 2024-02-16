@@ -20,8 +20,8 @@ export const useGraphQlSubscription = <TResult, TVariables extends Variables = V
   ...[variables]: TVariables extends Record<any, never>
     ? [undefined?]
     : keyof RemoveIndex<TVariables> extends never
-    ? [undefined?]
-    : [TVariables]
+      ? [undefined?]
+      : [TVariables]
 ) => {
   const unsubscribe = useState(() => {
     graphqlWsClient.subscribe<TResult>(
